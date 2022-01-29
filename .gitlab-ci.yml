@@ -11,6 +11,8 @@ stages:
       paths:
         - .cache/pip
         - .venv
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
   before_script:
     - export PYTHONPATH=$PYTHONPATH:./src
