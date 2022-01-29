@@ -30,6 +30,11 @@ isort:
   script:
     - poetry run isort . --check
 
+flake8:
+  <<: *lint-job
+  script:
+    - poetry run flake8
+
 pytest:
   <<: *lint-job
   script:
