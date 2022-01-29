@@ -17,7 +17,22 @@ stages:
     - poetry config virtualenvs.in-project true
     - poetry install
 
+black:
+  <<: *lint-job
+  script:
+    - poetry run black . --check
+
+isort:
+  <<: *lint-job
+  script:
+    - poetry run isort . --check
+
 pytest:
   <<: *lint-job
   script:
     - poetry run pytest
+
+mypy:
+  <<: *lint-job
+  script:
+    - poetry run mypy .
