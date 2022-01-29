@@ -9,12 +9,12 @@ stages:
         files:
           - poetry.lock
       paths:
+        - .cache/pip
         - .venv
 
   before_script:
-    - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-    - export PATH="$PATH:$HOME/.poetry/bin/"
-    - source $HOME/.poetry/env
+    - pip install poetry
+    - poetry config virtualenvs.in-project true
     - poetry install
 
 pytest:
