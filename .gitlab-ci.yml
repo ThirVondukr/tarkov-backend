@@ -1,5 +1,6 @@
 stages:
   - lint
+  - build
 
 .lint-job: &lint-job
   image: python:3.10-slim
@@ -44,3 +45,14 @@ mypy:
   <<: *lint-job
   script:
     - poetry run mypy .
+
+build:
+  <<: *lint-job
+  stage: build
+  script:
+    pip install pyinstaller
+    pyinstaller main.spec --onefile
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
