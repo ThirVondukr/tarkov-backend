@@ -50,8 +50,8 @@ build:
   <<: *lint-job
   stage: build
   script:
-    pip install pyinstaller
-    pyinstaller main.spec --onefile
+    - pip install pyinstaller
+    - pyinstaller main.spec --onefile
   artifacts:
     paths:
       - dist/
