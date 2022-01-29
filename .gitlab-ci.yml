@@ -13,6 +13,7 @@ stages:
         - .venv
 
   before_script:
+    - export PYTHONPATH=$PYTHONPATH:./src
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - poetry install
