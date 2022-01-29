@@ -1,6 +1,7 @@
-stages: lint
+stages:
+  - lint
 
-.lint-job: &lint-job:
+.lint-job: &lint-job
   image: python:3.10-slim
   stage: lint
   cache:
