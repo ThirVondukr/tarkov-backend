@@ -1,0 +1,22 @@
+stages: lint
+
+.lint-job: &lint-job:
+  image: python:3.10-slim
+  stage: lint
+  cache:
+    - key:
+        files:
+          - poetry.lock
+      paths:
+        - .venv
+
+  before_script:
+    - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+    - export PATH="$PATH:$HOME/.poetry/bin/"
+    - source $HOME/.poetry/env
+    - poetry install
+
+pytest:
+  <<: *lint-job
+  script:
+    - poetry run pytest
