@@ -3,8 +3,11 @@ from fastapi import APIRouter, Depends, Request
 import settings
 from launcher.schema import ServerInfo
 from launcher.services import EditionsService
+from responses import ZLibORJSONResponse
 
-router = APIRouter()
+router = APIRouter(
+    default_response_class=ZLibORJSONResponse,
+)
 
 
 @router.get(
