@@ -8,6 +8,12 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 def generate_certificates(directory: Path) -> None:
+    key_path = directory.joinpath("key.pem")
+    cert_path = directory.joinpath("certificate.pem")
+
+    if key_path.exists() and cert_path.exists():
+        return
+
     key = rsa.generate_private_key(public_exponent=0x10001, key_size=2048)
     bytes_ = key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -15,7 +21,7 @@ def generate_certificates(directory: Path) -> None:
         encryption_algorithm=serialization.BestAvailableEncryption(b" "),
     )
 
-    with directory.joinpath("key.pem").open("wb") as file:
+    with key_path.open("wb") as file:
         file.write(bytes_)
 
     subject = issuer = x509.Name(
@@ -37,5 +43,5 @@ def generate_certificates(directory: Path) -> None:
         .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=365 * 42))
         .sign(key, hashes.SHA256())
     )
-    with directory.joinpath("certificate.pem").open("wb") as file:
+    with cert_path.open("wb") as file:
         file.write(cert.public_bytes(serialization.Encoding.PEM))
