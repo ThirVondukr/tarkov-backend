@@ -6,6 +6,7 @@ from app import create_app
 
 LOCALES = ["ru", "en"]
 
+
 @pytest.fixture
 def app() -> FastAPI:
     return create_app()
