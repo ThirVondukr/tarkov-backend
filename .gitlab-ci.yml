@@ -21,6 +21,7 @@ stages:
 
   before_script:
     - export PYTHONPATH=$PYTHONPATH:./src
+    - python -m pip install --upgrade pip
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - poetry install
