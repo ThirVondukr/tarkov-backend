@@ -9,7 +9,6 @@ COPY pyproject.toml .
 COPY poetry.lock .
 RUN poetry install --no-dev
 
-COPY main.py .
 COPY ./src ./src
 
 ENV PYTHONPATH=src
