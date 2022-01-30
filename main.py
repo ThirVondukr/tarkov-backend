@@ -5,7 +5,7 @@ import uvicorn
 import utils
 
 
-def main():
+def main() -> None:
     certs_directory = Path("resources/certs")
     certs_directory.mkdir(exist_ok=True)
     utils.generate_certificates(certs_directory)
