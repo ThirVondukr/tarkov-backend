@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app import create_app
 
+LOCALES = ["ru", "en"]
 
 @pytest.fixture
 def app() -> FastAPI:
