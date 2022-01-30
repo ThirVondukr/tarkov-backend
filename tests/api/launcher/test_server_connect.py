@@ -32,5 +32,5 @@ def test_backend_url(response_json, base_url):
 
 def test_edition_list(response_json: dict):
     starting_profiles_dir = Path("resources/database/starting_profiles").glob("*")
-    available_editions = sorted(d.name for d in starting_profiles_dir)
+    available_editions = sorted(d.name for d in starting_profiles_dir if d.is_dir())
     assert response_json["editions"] == available_editions
