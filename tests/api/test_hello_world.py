@@ -2,8 +2,6 @@ import httpx
 import pytest
 from fastapi import status
 
-pytestmark = [pytest.mark.asyncio]
-
 
 @pytest.fixture
 async def response(http_client) -> httpx.Response:
