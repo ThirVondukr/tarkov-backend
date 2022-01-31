@@ -25,6 +25,13 @@ async def test_taken_username(
     assert await account_service.is_username_taken(account.username)
 
 
+async def test_not_taken_username(
+    account_service: AccountService,
+):
+    for _ in range(10):
+        assert not await account_service.is_username_taken(str(uuid.uuid4()))
+
+
 async def test_can_create_account(
     account_service: AccountService,
     session: AsyncSession,
