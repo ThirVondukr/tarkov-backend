@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from fastapi import FastAPI
 
 import launcher
