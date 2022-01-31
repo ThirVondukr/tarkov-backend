@@ -2,12 +2,12 @@ import zlib
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
-from server import ZLibORJSONResponse, ZLibRoute
 
 import accounts.schema
 import settings
 from accounts.services import AccountService
 from launcher.services import EditionsService
+from server import ZLibORJSONResponse, ZLibRoute
 
 from . import schema
 
