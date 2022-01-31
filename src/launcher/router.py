@@ -2,17 +2,18 @@ import zlib
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
+from server import ZLibORJSONResponse, ZLibRoute
 
 import accounts.schema
 import settings
 from accounts.services import AccountService
 from launcher.services import EditionsService
-from responses import ZLibORJSONResponse
 
 from . import schema
 
 router = APIRouter(
     default_response_class=ZLibORJSONResponse,
+    route_class=ZLibRoute,
 )
 
 
