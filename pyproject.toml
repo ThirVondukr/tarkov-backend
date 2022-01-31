@@ -15,6 +15,9 @@ httpx = "^0.22.0"
 aiofiles = "^0.8.0"
 cryptography = "^36.0.1"
 orjson = "3.6.5"
+SQLAlchemy = "^1.4.31"
+aiosqlite = "^0.17.0"
+alembic = "^1.7.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -32,7 +35,7 @@ asyncio_mode = "auto"
 profile = "black"
 
 [tool.mypy]
-exclude = "tests"
+exclude = "(resources|tests)"
 plugins = ["pydantic.mypy"]
 
 follow_imports = "silent"
