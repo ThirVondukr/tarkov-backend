@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,12 +13,12 @@ def account_service(session):
     return AccountService(session=session)
 
 
-async def def_test_returns_failed_if_username_taken(
+async def test_taken_username(
     account_service: AccountService,
     session: AsyncSession,
 ):
     account = Account(username="username", password="password", edition="Standard")
-    await session.add(account)
+    session.add(account)
     await session.commit()
     await session.refresh(account)
 
