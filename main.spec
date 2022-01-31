@@ -1,14 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+hiddenimports = ["app"]
 
 block_cipher = None
 
 a = Analysis(
-    ['main.py'],
+    ["main.py"],
      pathex=["src"],
      binaries=[],
      datas=[],
-     hiddenimports=["app"],
+     hiddenimports=hiddenimports,
      hookspath=[],
      hooksconfig={},
      runtime_hooks=[],

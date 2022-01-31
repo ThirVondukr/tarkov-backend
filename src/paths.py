@@ -1,4 +1,11 @@
+import sys
 from pathlib import Path
 
-resources = Path("resources")
-database = Path("resources/database")
+if getattr(sys, 'frozen', False):
+    application_path = Path(sys.executable).parent
+else:
+    application_path = Path(__file__).parent.parent
+
+resources = application_path.joinpath("resources")
+database = application_path.joinpath("resources/database")
+certificates = application_path.joinpath("resources/certs")

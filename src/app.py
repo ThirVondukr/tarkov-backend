@@ -3,14 +3,14 @@ from pathlib import Path
 from fastapi import FastAPI
 
 import launcher
+import paths
 import startup
 import utils
 
 
 def create_app() -> FastAPI:
-    certs_directory = Path("resources/certs")
-    certs_directory.mkdir(exist_ok=True)
-    utils.generate_certificates(certs_directory)
+    paths.certificates.mkdir(exist_ok=True)
+    utils.generate_certificates(paths.certificates)
 
     app = FastAPI()
     app.include_router(router=startup.router)
