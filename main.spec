@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-hiddenimports = ["app"]
+hiddenimports = ["app", "aiosqlite"]
 
 block_cipher = None
 
