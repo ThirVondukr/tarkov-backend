@@ -1,3 +1,5 @@
+from typing import cast
+
 from sqlalchemy import BOOLEAN, Column, Integer, String
 
 from .base import Base
@@ -13,3 +15,7 @@ class Account(Base):
     should_wipe = Column(BOOLEAN, nullable=False, default=True)
 
     profile_id = Column(String(64), nullable=True, unique=True)
+
+    @property
+    def email(self) -> str:
+        return cast(str, self.username)

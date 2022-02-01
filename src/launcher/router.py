@@ -1,11 +1,13 @@
 import zlib
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
 import settings
-from accounts.schema import AccountCreate, AccountLogin
+from accounts.schema import AccountCreate, AccountLogin, AccountSchema
 from accounts.services import AccountService
+from database.models import Account
 from launcher.services import EditionsService
 from server import ZLibORJSONResponse, ZLibRoute
 
@@ -53,3 +55,14 @@ async def login(
     if user is None:
         return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
     return PlainTextResponse(content=zlib.compress("OK".encode("utf8")))
+
+
+@router.post(
+    "/launcher/profile/get",
+    response_model=AccountSchema,
+)
+async def get_profile(
+    account_in: AccountLogin,
+    account_service: AccountService = Depends(AccountService),
+) -> Optional[Account]:
+    return await account_service.login(account_in)
