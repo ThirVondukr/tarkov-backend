@@ -1,22 +1,7 @@
 import zlib
-from typing import Any, Generic, Mapping, TypeVar
+from typing import Any, Mapping
 
 from fastapi.responses import ORJSONResponse
-from pydantic.generics import GenericModel
-
-T = TypeVar("T")
-
-
-class SuccessResponse(GenericModel, Generic[T]):
-    data: T | None = None
-    err: int = 0
-    errmsg: str | None = None
-
-
-class ErrorResponse(GenericModel):
-    err: int = True
-    errmsg: str | None
-    data: Any = None
 
 
 class ZLibORJSONResponse(ORJSONResponse):

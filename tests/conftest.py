@@ -4,9 +4,12 @@ import uuid
 import httpx
 import pytest
 from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
 import settings
 from app import create_app
+from database.base import Base, Session
+from database.models import Account
 
 LOCALES = ["ru", "en"]
 
@@ -41,3 +44,41 @@ def server_name() -> str:
     settings.server.name = str(uuid.uuid4())
     yield settings.server.name
     settings.server.name = old_name
+
+
+@pytest.fixture(scope="session")
+async def engine() -> AsyncEngine:
+    in_memory_url = "sqlite+aiosqlite://"
+    settings.database.url = in_memory_url
+    return create_async_engine(url=in_memory_url, future=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def create_tables(engine: AsyncEngine):
+    async with engine.connect() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+@pytest.fixture(autouse=True)
+async def session(engine: AsyncEngine) -> AsyncSession:
+    async with engine.connect() as conn:
+        transaction = await conn.begin()
+        Session.configure(bind=conn)
+
+        async with Session() as session:
+            yield session
+
+        await transaction.rollback()
+
+
+@pytest.fixture
+async def account(session: AsyncSession) -> Account:
+    account = Account(
+        username=str(uuid.uuid4()),
+        password="Password",
+        edition="Standard",
+    )
+    session.add(account)
+    await session.commit()
+    await session.refresh(account)
+    return account
