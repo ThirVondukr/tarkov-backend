@@ -33,7 +33,7 @@ asyncio_mode = "auto"
 profile = "black"
 
 [tool.mypy]
-exclude = "(resources|tests)"
+exclude = "(dist|resources|tests)"
 plugins = ["pydantic.mypy"]
 
 follow_imports = "silent"

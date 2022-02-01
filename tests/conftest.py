@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 import settings
 from app import create_app
 from database.base import Base, Session
+from database.models import Account
 
 LOCALES = ["ru", "en"]
 
@@ -68,3 +69,16 @@ async def session(engine: AsyncEngine) -> AsyncSession:
             yield session
 
         await transaction.rollback()
+
+
+@pytest.fixture
+async def account(session: AsyncSession) -> Account:
+    account = Account(
+        username=str(uuid.uuid4()),
+        password="Password",
+        edition="Standard",
+    )
+    session.add(account)
+    await session.commit()
+    await session.refresh(account)
+    return account

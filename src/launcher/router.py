@@ -3,8 +3,8 @@ import zlib
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
-import accounts.schema
 import settings
+from accounts.schema import AccountCreate, AccountLogin
 from accounts.services import AccountService
 from launcher.services import EditionsService
 from server import ZLibORJSONResponse, ZLibRoute
@@ -34,11 +34,22 @@ def connect(
 
 @router.post("/launcher/profile/register")
 async def create_account(
-    account_in: accounts.schema.AccountCreate,
+    account_in: AccountCreate,
     account_service: AccountService = Depends(AccountService),
 ) -> PlainTextResponse:
     if await account_service.is_username_taken(account_in.username):
         return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
 
-    await account_service.create_account(account_in=account_in)
+    await account_service.create_account(model=account_in)
+    return PlainTextResponse(content=zlib.compress("OK".encode("utf8")))
+
+
+@router.post("/launcher/profile/login")
+async def login(
+    account_in: AccountLogin,
+    account_service: AccountService = Depends(AccountService),
+) -> PlainTextResponse:
+    user = await account_service.login(account_in)
+    if user is None:
+        return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
     return PlainTextResponse(content=zlib.compress("OK".encode("utf8")))

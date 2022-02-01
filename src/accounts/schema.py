@@ -9,3 +9,11 @@ class AccountCreate(BaseModel):
     username: str = pydantic.Field(alias="email")
     password: str
     edition: str
+
+
+class AccountLogin(BaseModel):
+    class Config:
+        allow_population_by_field_name = True
+
+    username: str = pydantic.Field(alias="email")
+    password: str
