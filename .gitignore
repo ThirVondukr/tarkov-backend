@@ -3,3 +3,4 @@ build
 dist
 
 resources/certs
+resources/db.sqlite3
