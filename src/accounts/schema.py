@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pydantic
 from pydantic import BaseModel
 
