@@ -1,10 +1,29 @@
 import datetime
+import time
 from pathlib import Path
 
 from cryptography import x509
 from cryptography.hazmat._oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import Request
+
+
+def camel(snake: str) -> str:
+    first, *rest = snake.split("_")
+    return first + "".join(s.capitalize() for s in rest)
+
+
+def pascal(snake: str) -> str:
+    return "".join(s.capitalize() for s in snake.split("_"))
+
+
+def timestamp() -> int:
+    return int(time.time())
+
+
+def server_url(request: Request) -> str:
+    return f"https://{request.base_url.hostname}:443"
 
 
 def generate_certificates(directory: Path) -> None:
