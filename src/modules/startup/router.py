@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 
 import utils
 from dependencies import get_profile_id
-from languages.services import LanguageService
+from modules.languages.services import LanguageService
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
 

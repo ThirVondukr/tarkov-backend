@@ -3,9 +3,9 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from accounts.schema import AccountCreate
-from accounts.services import AccountService
 from database.models import Account
+from modules.accounts.schema import AccountCreate
+from modules.accounts.services import AccountService
 
 
 @pytest.fixture

@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 
-import languages
-import launcher
 import paths
-import startup
 import utils
 from database import migrations
+from modules import languages, launcher, startup
 
 
 def create_app() -> FastAPI:

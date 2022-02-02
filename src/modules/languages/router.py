@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from languages.services import LanguageService
+from modules.languages.services import LanguageService
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
 

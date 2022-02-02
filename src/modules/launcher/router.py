@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
 import settings
-from accounts.schema import AccountCreate, AccountLogin, AccountSchema
-from accounts.services import AccountService
 from database.models import Account
-from launcher.services import EditionsService
+from modules.accounts.schema import AccountCreate, AccountLogin, AccountSchema
+from modules.accounts.services import AccountService
+from modules.launcher.services import EditionsService
 from server import ZLibORJSONResponse, ZLibRoute
 
 from . import schema
