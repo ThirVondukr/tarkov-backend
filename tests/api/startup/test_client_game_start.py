@@ -18,4 +18,4 @@ def test_returns_200(response: httpx.Response):
 
 
 def test_returns_current_time(response: httpx.Response):
-    assert response.json()["data"] == {"utc_time": int(return_time / 1000)}
+    assert response.json()["data"] == {"utc_time": int(return_time)}

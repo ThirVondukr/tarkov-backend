@@ -11,7 +11,7 @@ router = APIRouter(tags=["Startup"])
 
 @router.post("/client/game/start")
 def client_game_start() -> Success[dict]:
-    data = {"utc_time": int(time.time() / 1000)}
+    data = {"utc_time": utils.timestamp()}
     return Success(data=data)
 
 
