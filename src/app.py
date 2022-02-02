@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+import languages
 import launcher
 import paths
 import startup
@@ -14,6 +15,7 @@ def create_app() -> FastAPI:
     app = FastAPI()
     app.include_router(router=startup.router)
     app.include_router(router=launcher.router)
+    app.include_router(router=languages.router)
 
     @app.on_event("startup")
     async def on_startup() -> None:
