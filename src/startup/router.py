@@ -1,12 +1,20 @@
-import time
+from types import NoneType
 
-import aiofiles
-import orjson
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 
+import utils
+from dependencies import get_profile_id
+from languages.services import LanguageService
 from schema import Success
+from server import ZLibORJSONResponse, ZLibRoute
 
-router = APIRouter(tags=["Startup"])
+from . import schema
+
+router = APIRouter(
+    tags=["Startup"],
+    route_class=ZLibRoute,
+    default_response_class=ZLibORJSONResponse,
+)
 
 
 @router.post("/client/game/start")
@@ -15,9 +23,25 @@ def client_game_start() -> Success[dict]:
     return Success(data=data)
 
 
-@router.post("/client/game/locale/{locale}")
-async def client_game_locale(locale: str) -> Success[dict]:
-    path = f"resources/database/locales/{locale}/menu.json"
-    async with aiofiles.open(path, encoding="utf8") as file:
-        contents = await file.read()
-    return Success(data=orjson.loads(contents))
+@router.post("/client/game/version/validate")
+def client_game_version_validate() -> Success[NoneType]:
+    return Success()
+
+
+@router.post("/client/game/config")
+async def client_game_config(
+    request: Request,
+    profile_id: str = Depends(get_profile_id),
+    language_service: LanguageService = Depends(),
+) -> Success[schema.ClientGameConfig]:
+    config = schema.ClientGameConfig(
+        aid=profile_id,
+        token=profile_id,
+        active_profile_id=f"user{profile_id}pmc",
+        nickname="user",
+        languages=await language_service.languages(),
+        backend=schema.Backend.from_root_url(
+            utils.server_url(request),
+        ),
+    )
+    return Success(data=config)
