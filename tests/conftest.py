@@ -11,8 +11,6 @@ from app import create_app
 from database.base import Base, Session
 from database.models import Account
 
-LOCALES = ["ru", "en"]
-
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -82,3 +80,8 @@ async def account(session: AsyncSession) -> Account:
     await session.commit()
     await session.refresh(account)
     return account
+
+
+@pytest.fixture(params=["ru", "en"])
+def language(request) -> str:
+    return request.param

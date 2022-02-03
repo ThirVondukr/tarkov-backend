@@ -32,8 +32,8 @@ class LanguageService:
     def available_languages(self) -> list[str]:
         return [path.name for path in self.locales_dir.iterdir() if path.is_dir()]
 
-    async def game_locale(self, lang: str) -> dict[str, Any]:
-        path = self.locales_dir.joinpath(lang, "menu.json")
+    async def menu_locale(self, language: str) -> dict[str, Any]:
+        path = self.locales_dir.joinpath(language, "menu.json")
         async with aiofiles.open(path, encoding="utf8") as file:
             contents = await file.read()
         return cast(dict[str, Any], orjson.loads(contents))
