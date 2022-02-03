@@ -11,12 +11,20 @@ router = APIRouter(
 )
 
 
-@router.post("/client/menu/locale/{lang}")
-async def client_game_locale(
-    lang: str,
+@router.post("/client/menu/locale/{language}")
+async def client_menu_language(
+    language: str,
     language_service: LanguageService = Depends(),
 ) -> Success[dict]:
-    return Success(data=await language_service.menu_locale(lang))
+    return Success(data=await language_service.menu_locale(language))
+
+
+@router.post("/client/locale/{language}")
+async def client_game_language(
+    language: str,
+    language_service: LanguageService = Depends(),
+) -> Success[dict]:
+    return Success(data=await language_service.client_locale(language))
 
 
 @router.post("/client/languages")
