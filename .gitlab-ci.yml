@@ -4,6 +4,7 @@ stages:
 .lint-job: &lint-job
   image: python:3.10-slim
   stage: lint
+  interruptible: true
   cache:
     - key:
         files:
@@ -44,7 +45,13 @@ flake8:
 pytest:
   <<: *lint-job
   script:
-    - poetry run pytest
+    - poetry run coverage run
+    - poetry run coverage report
+    - poetry run coverage xml
+  coverage: "/^TOTAL.*\\s(\\d*)/"
+  artifacts:
+    reports:
+      cobertura: coverage.xml
 
 mypy:
   <<: *lint-job

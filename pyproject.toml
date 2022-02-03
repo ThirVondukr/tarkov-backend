@@ -26,6 +26,18 @@ mypy = "^0.931"
 flake8 = "^4.0.1"
 types-aiofiles = "^0.8.3"
 pre-commit = "^2.17.0"
+coverage = {extras = ["toml"], version = "^6.3.1"}
+
+[tool.coverage.run]
+source = ["src"]
+command_line = "-m pytest"
+concurrency = ["greenlet"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
