@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-if getattr(sys, "frozen", False):
+if getattr(sys, "frozen", False):  # pragma: no cover
     application_path = Path(sys.executable).parent
 else:
     application_path = Path(__file__).parent.parent

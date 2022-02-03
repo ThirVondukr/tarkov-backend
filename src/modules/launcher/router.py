@@ -23,7 +23,7 @@ router = APIRouter(
     "/launcher/server/connect",
     response_model=schema.ServerInfo,
 )
-def connect(
+async def connect(
     request: Request,
     editions_service: EditionsService = Depends(),
 ) -> schema.ServerInfo:

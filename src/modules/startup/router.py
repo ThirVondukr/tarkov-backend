@@ -18,13 +18,13 @@ router = APIRouter(
 
 
 @router.post("/client/game/start")
-def client_game_start() -> Success[dict]:
+async def client_game_start() -> Success[dict]:
     data = {"utc_time": utils.timestamp()}
     return Success(data=data)
 
 
 @router.post("/client/game/version/validate")
-def client_game_version_validate() -> Success[NoneType]:
+async def client_game_version_validate() -> Success[NoneType]:
     return Success()
 
 
