@@ -16,9 +16,9 @@ def test_path(editions_service):
 
 
 def test_available_editions(editions_service):
-    expected = [
+    expected = set(
         d.name
         for d in paths.database.joinpath("starting_profiles").iterdir()
         if d.is_dir()
-    ]
-    assert editions_service.available_editions == expected
+    )
+    assert set(editions_service.available_editions) == expected
