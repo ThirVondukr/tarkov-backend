@@ -1,4 +1,5 @@
 import httpx
+import orjson
 import pytest
 from fastapi import status
 
@@ -16,6 +17,13 @@ def test_status_200(response: httpx.Response):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_returns_list_of_available_languages(response: httpx.Response):
-    locales = [dir.name for dir in paths.locales.iterdir() if dir.is_dir()]
-    assert response.json() == {"data": locales, "err": 0, "errmsg": None}
+def test_returns_list_of_language_files(response: httpx.Response):
+    locale_files = [
+        d.joinpath(f"{d.name}.json") for d in paths.locales.iterdir() if d.is_dir()
+    ]
+    expected = []
+    for locale_file in locale_files:
+        with locale_file.open(encoding="utf8") as f:
+            expected.append(orjson.loads(f.read()))
+
+    assert response.json() == {"data": expected, "err": 0, "errmsg": None}

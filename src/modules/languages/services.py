@@ -15,13 +15,9 @@ class LanguageService:
 
         :return: dict[str, str]
         """
-        data = {}
-
-        for language in self.available_languages():
-            contents_json = await self._load_locale_file(language, f"{language}.json")
-            data[contents_json["ShortName"]] = contents_json["Name"]
-
-        return data
+        return {
+            lang["ShortName"]: lang["Name"] for lang in await self.client_languages()
+        }
 
     def available_languages(self) -> list[str]:
         return [path.name for path in self.locales_dir.iterdir() if path.is_dir()]
@@ -31,6 +27,13 @@ class LanguageService:
 
     async def client_locale(self, language: str) -> dict[str, Any]:
         return await self._load_locale_file(language, "locale.json")
+
+    async def client_languages(self) -> list[dict[str, str]]:
+        languages = []
+        for language in self.available_languages():
+            contents_json = await self._load_locale_file(language, f"{language}.json")
+            languages.append(contents_json)
+        return languages
 
     async def _load_locale_file(self, language: str, filename: str) -> dict[str, Any]:
         path = self.locales_dir.joinpath(language, filename)
