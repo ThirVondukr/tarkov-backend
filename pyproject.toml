@@ -40,6 +40,7 @@ concurrency = ["greenlet", "thread"]
 show_missing = true
 skip_covered = true
 skip_empty = true
+precision = 2
 
 
 [tool.pytest.ini_options]
