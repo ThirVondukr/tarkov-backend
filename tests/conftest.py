@@ -13,6 +13,7 @@ import settings
 from app import create_app
 from database.base import Base, Session
 from database.models import Account
+from modules.profile.services import ProfileService
 from tests.utils import deflate_hook
 
 
