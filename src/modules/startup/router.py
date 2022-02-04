@@ -72,3 +72,11 @@ async def client_customization() -> Success[dict[str, Any]]:
             customization[contents["_id"]] = contents
 
     return Success(data=customization)
+
+
+@router.post("/client/globals", response_model=Success[dict])
+async def client_globals() -> Success[dict]:
+    globals_path = paths.base.joinpath("globals.json")
+    async with aiofiles.open(globals_path, encoding="utf8") as file:
+        data = orjson.loads(await file.read())
+    return Success(data=data)

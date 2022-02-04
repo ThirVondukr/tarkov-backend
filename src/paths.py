@@ -11,6 +11,7 @@ config = resources.joinpath("config")
 certificates = resources.joinpath("certs")
 
 database = application_path.joinpath("resources/database")
+base = database.joinpath("base")
 customization = database.joinpath("customization")
 locales = database.joinpath("locales")
 items = database.joinpath("items")
