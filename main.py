@@ -1,7 +1,12 @@
 import uvicorn
 
+import paths
+import utils
+
 
 def main() -> None:
+    paths.certificates.mkdir(exist_ok=True)
+    utils.generate_certificates(paths.certificates)
     uvicorn.run(
         "app:create_app",
         port=443,

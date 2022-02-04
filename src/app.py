@@ -1,16 +1,11 @@
 from fastapi import FastAPI
 
-import paths
-import utils
 from database import migrations
 from modules import items, languages, launcher, profile, singleplayer, startup, trading
 from server.middleware import strip_unity_content_encoding
 
 
 def create_app() -> FastAPI:
-    paths.certificates.mkdir(exist_ok=True)
-    utils.generate_certificates(paths.certificates)
-
     app = FastAPI()
     app.middleware("http")(strip_unity_content_encoding)
     app.include_router(router=items.router)
