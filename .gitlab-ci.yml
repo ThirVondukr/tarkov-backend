@@ -48,7 +48,7 @@ pytest:
     - poetry run coverage run
     - poetry run coverage report
     - poetry run coverage xml
-  coverage: "/^TOTAL.*\\s(\\d*)/"
+  coverage: "/^TOTAL.*\s(\d+\.\d+)\%/"
   artifacts:
     reports:
       cobertura: coverage.xml
