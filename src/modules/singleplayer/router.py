@@ -16,8 +16,20 @@ async def singleplayer_bundles() -> list[str]:
     return []
 
 
-@router.get("/mode/offline")
-async def mode_offline() -> dict[str, bool]:
+@router.get(
+    "/mode/offline",
+    response_model=dict[str, bool],
+)
+def mode_offline() -> dict[str, bool]:
     with paths.config.joinpath("patches.yml").open() as f:
         patches = yaml.load(f, Loader=CSafeLoader)
     return patches  # type: ignore
+
+
+@router.get(
+    "/mode/offlineNodes",
+    response_model=dict[str, bool],
+)
+def mode_offline_nodes() -> dict[str, bool]:
+    with paths.config.joinpath("patch_nodes.yml").open() as f:
+        return yaml.load(f, Loader=CSafeLoader)
