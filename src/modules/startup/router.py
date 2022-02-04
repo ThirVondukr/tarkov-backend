@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, Request
 
 import paths
 import utils
-from dependencies import get_profile_id
 from modules.languages.services import LanguageService
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
 from utils import read_json_file
 
+from ..profile.dependencies import get_profile_id
 from . import schema
 
 router = APIRouter(
