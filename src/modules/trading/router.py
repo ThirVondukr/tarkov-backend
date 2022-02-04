@@ -1,13 +1,12 @@
 import operator
 from typing import Any
 
-import aiofiles
-import orjson
 from fastapi import APIRouter
 
 import paths
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
+from utils import read_json_file
 
 router = APIRouter(
     tags=["Trading"],
@@ -21,9 +20,6 @@ router = APIRouter(
     response_model=Success[list[dict[str, Any]]],
 )
 async def trader_settings() -> Success[list[dict[str, Any]]]:
-    bases = []
-    for base in paths.traders.rglob("base.json"):
-        async with aiofiles.open(base, encoding="utf8") as file:
-            bases.append(orjson.loads(await file.read()))
+    bases = [await read_json_file(base) for base in paths.traders.rglob("base.json")]
     bases.sort(key=operator.itemgetter("_id"))
     return Success(data=bases)

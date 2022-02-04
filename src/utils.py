@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import datetime
 import time
+from os import PathLike
 from pathlib import Path
 from typing import Any
 
+import aiofiles
+import orjson
 from cryptography import x509
 from cryptography.hazmat._oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
@@ -29,6 +34,11 @@ def timestamp() -> int:
 
 def server_url(request: Request) -> str:
     return f"https://{request.base_url.hostname}:443"
+
+
+async def read_json_file(path: PathLike[str]) -> Any:
+    async with aiofiles.open(path, encoding="utf8") as file:
+        return orjson.loads(await file.read())
 
 
 def generate_certificates(directory: Path) -> None:

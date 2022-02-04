@@ -1,9 +1,7 @@
 from typing import Any, cast
 
-import aiofiles
-import orjson
-
 import paths
+from utils import read_json_file
 
 
 class LanguageService:
@@ -37,6 +35,4 @@ class LanguageService:
 
     async def _load_locale_file(self, language: str, filename: str) -> dict[str, Any]:
         path = self.locales_dir.joinpath(language, filename)
-        async with aiofiles.open(path, encoding="utf8") as file:
-            contents = await file.read()
-        return cast(dict[str, Any], orjson.loads(contents))
+        return cast(dict[str, Any], await read_json_file(path))
