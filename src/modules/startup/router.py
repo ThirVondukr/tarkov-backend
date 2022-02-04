@@ -80,3 +80,11 @@ async def client_globals() -> Success[dict]:
     async with aiofiles.open(globals_path, encoding="utf8") as file:
         data = orjson.loads(await file.read())
     return Success(data=data)
+
+
+@router.post("/client/settings", response_model=Success[dict])
+async def client_settings() -> Success[dict]:
+    path = paths.base.joinpath("client_settings.json")
+    async with aiofiles.open(path, encoding="utf8") as file:
+        data = orjson.loads(await file.read())
+    return Success(data=data)
