@@ -34,7 +34,7 @@ types-PyYAML = "^6.0.4"
 branch = true
 source = ["src"]
 command_line = "-m pytest"
-concurrency = ["greenlet"]
+concurrency = ["greenlet", "thread"]
 
 [tool.coverage.report]
 show_missing = true
