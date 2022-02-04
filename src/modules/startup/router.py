@@ -45,3 +45,11 @@ async def client_game_config(
         ),
     )
     return Success(data=config)
+
+
+@router.post(
+    "/client/game/keepalive",
+    response_model=Success[dict[str, str]],
+)
+async def keepalive() -> Success[dict[str, str]]:
+    return Success(data={"msg": "ok"})
