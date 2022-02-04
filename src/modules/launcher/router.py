@@ -16,6 +16,7 @@ from . import schema
 router = APIRouter(
     default_response_class=ZLibORJSONResponse,
     route_class=ZLibRoute,
+    tags=["Launcher"],
 )
 
 

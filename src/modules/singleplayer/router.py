@@ -10,6 +10,7 @@ from server import ZLibORJSONResponse, ZLibRoute
 router = APIRouter(
     default_response_class=ZLibORJSONResponse,
     route_class=ZLibRoute,
+    tags=["Singleplayer"],
 )
 
 
