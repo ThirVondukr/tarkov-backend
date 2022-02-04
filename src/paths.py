@@ -9,6 +9,7 @@ else:
 resources = application_path.joinpath("resources")
 config = resources.joinpath("config")
 certificates = resources.joinpath("certs")
+profiles = resources.joinpath("profiles")
 
 database = application_path.joinpath("resources/database")
 base = database.joinpath("base")
