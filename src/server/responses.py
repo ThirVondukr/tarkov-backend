@@ -14,5 +14,4 @@ class ZLibORJSONResponse(ORJSONResponse):
         super().init_headers(headers)
 
     def render(self, content: dict[Any, Any]) -> bytes:
-        self.init_headers({"Content-Encoding": "deflate"})
         return zlib.compress(super().render(content))

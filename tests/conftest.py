@@ -13,6 +13,7 @@ import settings
 from app import create_app
 from database.base import Base, Session
 from database.models import Account
+from tests.utils import deflate_hook
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +36,29 @@ def base_url() -> str:
 
 @pytest.fixture(scope="session")
 async def http_client(app: FastAPI, base_url) -> httpx.AsyncClient:
-    async with httpx.AsyncClient(app=app, base_url=base_url) as client:
+    client = httpx.AsyncClient(
+        app=app,
+        base_url=base_url,
+        event_hooks={"response": [deflate_hook]},
+    )
+    async with client:
+        yield client
+
+
+@pytest.fixture
+async def unity_client(app: FastAPI, base_url) -> httpx.AsyncClient:
+    unity_user_agent = (
+        "UnityPlayer/2019.1.14f1 (UnityWebRequest/1.0, libcurl/7.52.0-DEV)"
+    )
+    client = httpx.AsyncClient(
+        app=app,
+        base_url=base_url,
+        event_hooks={"response": [deflate_hook]},
+        headers={
+            "user-agent": unity_user_agent,
+        },
+    )
+    async with client:
         yield client
 
 

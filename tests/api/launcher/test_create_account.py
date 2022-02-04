@@ -1,5 +1,4 @@
 import uuid
-import zlib
 
 import httpx
 from fastapi import status
@@ -37,7 +36,7 @@ async def test_taken_username(
         },
     )
     assert response.status_code == status.HTTP_200_OK
-    assert zlib.decompress(response.content) == b"FAILED"
+    assert response.content == b"FAILED"
 
 
 async def test_create_account(
@@ -49,7 +48,7 @@ async def test_create_account(
         endpoint_url,
         json={"email": username, "password": "password", "edition": "Standard"},
     )
-    assert zlib.decompress(response.content) == b"OK"
+    assert response.content == b"OK"
 
     stmt = select(Account).filter(Account.username == username)
     account = await session.scalar(stmt)

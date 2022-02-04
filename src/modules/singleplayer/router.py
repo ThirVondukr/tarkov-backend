@@ -1,3 +1,5 @@
+from typing import cast
+
 import yaml
 from fastapi import APIRouter
 from yaml import CSafeLoader
@@ -32,4 +34,4 @@ def mode_offline() -> dict[str, bool]:
 )
 def mode_offline_nodes() -> dict[str, bool]:
     with paths.config.joinpath("patch_nodes.yml").open() as f:
-        return yaml.load(f, Loader=CSafeLoader)
+        return cast(dict[str, bool], yaml.load(f, Loader=CSafeLoader))

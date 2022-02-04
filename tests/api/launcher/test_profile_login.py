@@ -1,5 +1,3 @@
-import zlib
-
 import httpx
 import pytest
 from fastapi import status
@@ -41,8 +39,8 @@ async def test_failed_returns_200(response_failed: httpx.Response):
 
 
 async def test_failed_response(response_failed: httpx.Response):
-    assert zlib.decompress(response_failed.content) == b"FAILED"
+    assert response_failed.content == b"FAILED"
 
 
 async def test_ok_response(response_ok: httpx.Response):
-    assert zlib.decompress(response_ok.content) == b"OK"
+    assert response_ok.content == b"OK"
