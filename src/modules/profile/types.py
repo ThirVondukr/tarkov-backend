@@ -54,6 +54,6 @@ class Profile(BaseModel, alias_generator=pascal, extra=Extra.forbid):
     bonuses: list
     notes: dict
     quests: list
-    trader_info: dict
+    traders_info: dict
     ragfair_info: dict
     wish_list: list
