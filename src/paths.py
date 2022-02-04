@@ -15,6 +15,7 @@ base = database.joinpath("base")
 customization = database.joinpath("customization")
 locales = database.joinpath("locales")
 items = database.joinpath("items")
+traders = database.joinpath("traders")
 
 
 sqlite_db_path = resources.joinpath("db.sqlite3")
