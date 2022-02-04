@@ -1,3 +1,5 @@
+import operator
+
 import httpx
 import orjson
 import pytest
@@ -21,4 +23,5 @@ def test_returns_list_of_trader_bases(response: httpx.Response):
         with base.open(encoding="utf8") as file:
             expected.append(orjson.loads(file.read()))
 
+    expected.sort(key=operator.itemgetter("_id"))
     assert response.json()["data"] == expected
