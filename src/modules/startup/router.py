@@ -1,7 +1,11 @@
 from types import NoneType
+from typing import Any
 
+import aiofiles
+import orjson
 from fastapi import APIRouter, Depends, Request
 
+import paths
 import utils
 from dependencies import get_profile_id
 from modules.languages.services import LanguageService
@@ -53,3 +57,18 @@ async def client_game_config(
 )
 async def keepalive() -> Success[dict[str, str]]:
     return Success(data={"msg": "ok"})
+
+
+@router.post(
+    "/client/customization",
+    response_model=Success[dict[str, Any]],
+)
+async def client_customization() -> Success[dict[str, Any]]:
+    customization = {}
+    customization_files = paths.customization.glob("*.json")
+    for customization_file in customization_files:
+        async with aiofiles.open(customization_file, encoding="utf8") as f:
+            contents = orjson.loads(await f.read())
+            customization[contents["_id"]] = contents
+
+    return Success(data=customization)
