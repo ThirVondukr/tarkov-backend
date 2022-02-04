@@ -1,6 +1,7 @@
 import datetime
 import time
 from pathlib import Path
+from typing import Any
 
 from cryptography import x509
 from cryptography.hazmat._oid import NameOID
@@ -16,6 +17,10 @@ def camel(snake: str) -> str:
 
 def pascal(snake: str) -> str:
     return "".join(s.capitalize() for s in snake.split("_"))
+
+
+def underscore_prefix(snake: str) -> str:
+    return "_" + snake
 
 
 def timestamp() -> int:
@@ -64,3 +69,10 @@ def generate_certificates(directory: Path) -> None:
     )
     with cert_path.open("wb") as file:
         file.write(cert.public_bytes(serialization.Encoding.PEM))
+
+
+class Singleton:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        if not getattr(cls, "_instance", None):
+            cls._instance = super().__new__(cls, *args, **kwargs)
+        return cls._instance

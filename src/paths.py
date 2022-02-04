@@ -12,6 +12,7 @@ certificates = resources.joinpath("certs")
 
 database = application_path.joinpath("resources/database")
 locales = database.joinpath("locales")
+items = database.joinpath("items")
 
 
 sqlite_db_path = resources.joinpath("db.sqlite3")

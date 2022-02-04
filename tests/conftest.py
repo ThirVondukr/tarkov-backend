@@ -1,11 +1,14 @@
 import asyncio
+import itertools
 import uuid
 
 import httpx
+import orjson
 import pytest
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
+import paths
 import settings
 from app import create_app
 from database.base import Base, Session
@@ -85,3 +88,17 @@ async def account(session: AsyncSession) -> Account:
 @pytest.fixture(params=["ru", "en"])
 def language(request) -> str:
     return request.param
+
+
+@pytest.fixture(scope="session")
+def templates() -> list[dict]:
+    contents = []
+    for file in paths.items.glob("*.json"):
+        with file.open(encoding="utf8") as f:
+            contents.append(orjson.loads(f.read()))
+    return list(itertools.chain.from_iterable(contents))
+
+
+@pytest.fixture(scope="session")
+def templates_as_dict(templates) -> dict[str, dict]:
+    return {tpl["_id"]: tpl for tpl in templates}

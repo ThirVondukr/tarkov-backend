@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import paths
 import utils
 from database import migrations
-from modules import languages, launcher, singleplayer, startup
+from modules import items, languages, launcher, singleplayer, startup
 
 
 def create_app() -> FastAPI:
@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
     utils.generate_certificates(paths.certificates)
 
     app = FastAPI()
+    app.include_router(router=items.router)
     app.include_router(router=languages.router)
     app.include_router(router=launcher.router)
     app.include_router(router=singleplayer.router)
