@@ -72,6 +72,18 @@ async def client_customization() -> Success[dict[str, Any]]:
     return Success(data=customization)
 
 
+@router.post(
+    "/client/account/customization",
+    response_model=Success[list[str]],
+)
+async def client_account_customization() -> Success[list[str]]:
+    """
+    Returns list of all customization id's
+    """
+    customization_files = paths.customization.glob("*.json")
+    return Success(data=[file.stem for file in customization_files])
+
+
 @router.post("/client/globals", response_model=Success[dict])
 async def client_globals() -> Success[dict]:
     globals_path = paths.base.joinpath("globals.json")
