@@ -1,6 +1,8 @@
 from types import NoneType
 from typing import Any
 
+import aiofiles
+import orjson
 from fastapi import APIRouter, Depends, Request
 
 import paths
@@ -79,9 +81,17 @@ async def client_customization() -> Success[dict[str, Any]]:
 async def client_account_customization() -> Success[list[str]]:
     """
     Returns list of all customization id's
+    route should not return id's of items that have Node _type, only Item
     """
+    available_customization_ids: list[str] = []
     customization_files = paths.customization.glob("*.json")
-    return Success(data=[file.stem for file in customization_files])
+    for customization_file in customization_files:
+        async with aiofiles.open(customization_file) as f:
+            contents = orjson.loads(await f.read())
+            if contents["_type"] == "Item":
+                available_customization_ids.append(contents["_id"])
+
+    return Success(data=available_customization_ids)
 
 
 @router.post("/client/globals", response_model=Success[dict])
