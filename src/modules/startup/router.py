@@ -133,3 +133,10 @@ async def client_weather() -> Success[dict]:
     weather["time"] = time_str
 
     return Success(data=weather)
+
+
+@router.post("/client/locations", response_model=Success[dict[str, dict]])
+async def client_locations() -> Success[dict[str, dict]]:
+    location_bases = paths.database.joinpath("locations", "base").rglob("*.json")
+    locations = [await read_json_file(path) for path in location_bases]
+    return Success(data={loc["_Id"]: loc for loc in locations})
