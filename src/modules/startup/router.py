@@ -1,3 +1,5 @@
+import datetime
+import random
 from types import NoneType
 from typing import Any
 
@@ -104,3 +106,30 @@ async def client_globals() -> Success[dict]:
 async def client_settings() -> Success[dict]:
     path = paths.base.joinpath("client_settings.json")
     return Success(data=await read_json_file(path))
+
+
+@router.post("/client/weather", response_model=Success[dict])
+async def client_weather() -> Success[dict]:
+    weather_file_paths = list(paths.database.joinpath("weather").rglob("*.json"))
+    weather = await read_json_file(random.choice(weather_file_paths))
+
+    now = datetime.datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+
+    delta = datetime.timedelta(
+        hours=now.hour,
+        minutes=now.minute,
+        seconds=now.second,
+        microseconds=now.microsecond,
+    )
+    now_accelerated = now + delta * weather["acceleration"]
+    time_str = now_accelerated.strftime("%H:%M:%S")
+
+    weather["weather"]["timestamp"] = int(now.timestamp())
+    weather["weather"]["date"] = date_str
+    weather["date"] = date_str
+
+    weather["weather"]["time"] = time_str
+    weather["time"] = time_str
+
+    return Success(data=weather)
