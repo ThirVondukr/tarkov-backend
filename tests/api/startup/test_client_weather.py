@@ -1,5 +1,4 @@
 import datetime
-import time
 
 import httpx
 import pytest
@@ -17,7 +16,7 @@ def test_returns_200(response: httpx.Response):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_should_return_correct_time_in_weather(response: httpx.Response):
+def test_should_return_correct_time_in_weather(response: httpx.Response, freeze_time):
     weather = response.json()["data"]
 
     now = datetime.datetime.now()
@@ -36,7 +35,7 @@ def test_should_return_correct_time_in_weather(response: httpx.Response):
     date_str = accelerated_time.strftime("%Y-%m-%d")
     time_str = accelerated_time.strftime("%H:%M:%S")
 
-    assert weather["weather"]["timestamp"] == int(time.time())
+    assert weather["weather"]["timestamp"] == int(freeze_time)
 
     assert weather["weather"]["date"] == date_str
     assert weather["date"] == date_str
