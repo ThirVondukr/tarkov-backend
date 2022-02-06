@@ -27,7 +27,7 @@ class ProfileCreateCommand:
         self,
         account: Account,
         profile_create: ProfileCreate,
-    ) -> None:
+    ) -> Profile:
         character = await self._create_character(account, profile_create)
         character.inventory = await self._starting_inventory(
             account.edition, profile_create.side
@@ -43,6 +43,8 @@ class ProfileCreateCommand:
         profile_path.mkdir(exist_ok=True)
         with profile_path.joinpath("character.json").open("wb") as f:
             f.write(orjson.dumps(character.dict(by_alias=True)))
+
+        return character
 
     async def _create_character(
         self, account: Account, profile_create: ProfileCreate

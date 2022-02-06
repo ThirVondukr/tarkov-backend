@@ -55,12 +55,11 @@ async def nickname_validate(
     return Success(data={"status": "ok"})
 
 
-@router.post(
-    "/client/game/profile/create",
-)
+@router.post("/client/game/profile/create", response_model=Success[dict])
 async def create_profile(
     profile_create: schema.ProfileCreate,
     account: Account = Depends(get_account),
     command: ProfileCreateCommand = Depends(),
-) -> None:
-    await command.execute(account=account, profile_create=profile_create)
+) -> Success[dict]:
+    profile = await command.execute(account=account, profile_create=profile_create)
+    return Success(data={"uid": profile.id})

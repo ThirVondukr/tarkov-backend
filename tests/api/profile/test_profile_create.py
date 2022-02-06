@@ -69,6 +69,13 @@ async def test_should_update_account_model(
     assert account.should_wipe is False
 
 
+def test_should_return_profile_id(
+    account: Account,
+    response: httpx.Response,
+):
+    assert response.json()["data"] == {"uid": f"pmc{account.profile_id}"}
+
+
 def test_should_create_profile_file(
     response: httpx.Response,
     profile_dir: Path,
