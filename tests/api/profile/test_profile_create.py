@@ -127,3 +127,10 @@ def test_should_add_inventory(
         }
         item = {k: v for k, v in item.items() if k not in exclude_keys}
         assert starting_item == item
+
+    all_ids = set(item["_id"] for item in inventory["items"])
+    assert inventory["equipment"] in all_ids
+    assert inventory["questRaidItems"] in all_ids
+    assert inventory["questStashItems"] in all_ids
+    assert inventory["sortingTable"] in all_ids
+    assert inventory["stash"] in all_ids
