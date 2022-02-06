@@ -21,21 +21,25 @@ def test_should_return_correct_time_in_weather(response: httpx.Response):
     weather = response.json()["data"]
 
     now = datetime.datetime.now()
-    date_str = now.strftime("%Y-%m-%d")
-
-    assert weather["weather"]["timestamp"] == int(time.time())
-
-    assert weather["weather"]["date"] == date_str
-    assert weather["date"] == date_str
-
     delta = datetime.timedelta(
         hours=now.hour,
         minutes=now.minute,
         seconds=now.second,
         microseconds=now.microsecond,
     )
-    now_accelerated = now + delta * weather["acceleration"]
-    time_str = now_accelerated.strftime("%H:%M:%S")
+    accelerated_time = now + delta * weather["acceleration"]
+    accelerated_time.replace(
+        year=now.year,
+        month=now.month,
+        day=now.day,
+    )
+    date_str = accelerated_time.strftime("%Y-%m-%d")
+    time_str = accelerated_time.strftime("%H:%M:%S")
 
-    assert weather["weather"]["time"] == time_str
+    assert weather["weather"]["timestamp"] == int(time.time())
+
+    assert weather["weather"]["date"] == date_str
+    assert weather["date"] == date_str
+
+    assert weather["weather"]["time"] == accelerated_time.strftime("%Y-%m-%d %H:%M:%S")
     assert weather["time"] == time_str

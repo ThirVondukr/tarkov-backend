@@ -114,7 +114,6 @@ async def client_weather() -> Success[dict]:
     weather = await read_json_file(random.choice(weather_file_paths))
 
     now = datetime.datetime.now()
-    date_str = now.strftime("%Y-%m-%d")
 
     delta = datetime.timedelta(
         hours=now.hour,
@@ -122,14 +121,21 @@ async def client_weather() -> Success[dict]:
         seconds=now.second,
         microseconds=now.microsecond,
     )
-    now_accelerated = now + delta * weather["acceleration"]
-    time_str = now_accelerated.strftime("%H:%M:%S")
+    accelerated_time = now + delta * weather["acceleration"]
+    accelerated_time.replace(
+        year=now.year,
+        month=now.month,
+        day=now.day,
+    )
+
+    date_str = accelerated_time.strftime("%Y-%m-%d")
+    time_str = accelerated_time.strftime("%H:%M:%S")
 
     weather["weather"]["timestamp"] = int(now.timestamp())
     weather["weather"]["date"] = date_str
     weather["date"] = date_str
 
-    weather["weather"]["time"] = time_str
+    weather["weather"]["time"] = f"{date_str} {time_str}"
     weather["time"] = time_str
 
     return Success(data=weather)
