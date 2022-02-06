@@ -24,6 +24,7 @@ def _run_migrations(connection: Connection) -> None:
         target_metadata=Base.metadata,
         compare_type=True,
         fn=do_upgrade,
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
