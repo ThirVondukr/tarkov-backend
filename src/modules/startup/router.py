@@ -146,3 +146,22 @@ async def client_locations() -> Success[dict[str, dict]]:
     location_bases = paths.database.joinpath("locations", "base").rglob("*.json")
     locations = [await read_json_file(path) for path in location_bases]
     return Success(data={loc["_Id"]: loc for loc in locations})
+
+
+@router.post(
+    "/client/handbook/builds/my/list",
+    response_model=Success[list],
+)
+async def builds_list() -> Success[list]:
+    """Route should return list of user builds, currently not implemented"""
+    return Success(data=[])
+
+
+@router.post("/client/server/list", response_model=Success[dict])
+async def server_list(request: Request) -> Success[dict]:
+    return Success(
+        data={
+            "ip": utils.server_url(request),
+            "port": 443,
+        }
+    )

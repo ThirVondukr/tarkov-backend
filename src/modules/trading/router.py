@@ -23,3 +23,11 @@ async def trader_settings() -> Success[list[dict[str, Any]]]:
     bases = [await read_json_file(base) for base in paths.traders.rglob("base.json")]
     bases.sort(key=operator.itemgetter("_id"))
     return Success(data=bases)
+
+
+@router.post(
+    "/client/trading/customization/storage",
+    response_model=Success[dict],
+)
+async def customization_storage() -> Success[dict]:
+    return Success(data={})
