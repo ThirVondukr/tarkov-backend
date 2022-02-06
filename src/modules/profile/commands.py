@@ -70,7 +70,7 @@ class ProfileCreateCommand:
 
     async def _starting_inventory(self, edition: str, side: str) -> dict:
         path = paths.database.joinpath(
-            "starting_profiles", edition, f"inventory_{side}.json"
+            "starting_profiles", edition, f"inventory_{side.lower()}.json"
         )
         async with aiofiles.open(path) as f:
             inventory = orjson.loads(await f.read())
