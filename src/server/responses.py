@@ -7,7 +7,7 @@ from fastapi.responses import ORJSONResponse
 class ZLibORJSONResponse(ORJSONResponse):
     media_type = "application/json"
 
-    def init_headers(self, headers: Mapping[str, str] | None = None) -> None:
+    def init_headers(self, headers: Mapping[str, str] | None = None) -> None:  # pragma: no cover
         if not headers:
             headers = {}
         headers["Content-Encoding"] = "deflate"  # type: ignore
