@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
+from database.models import Account
 from modules.profile.dependencies import get_profile_id
 from modules.profile.services import ProfileService
 from modules.profile.types import Profile
 from schema import Error, Success
 from server import ZLibORJSONResponse, ZLibRoute
+
+from ..accounts.dependencies import get_account
+from . import schema
+from .commands import ProfileCreateCommand
 
 router = APIRouter(
     default_response_class=ZLibORJSONResponse,
@@ -48,3 +53,14 @@ async def nickname_validate(
         return Error(err=255, errmsg="The nickname is already in use")
 
     return Success(data={"status": "ok"})
+
+
+@router.post(
+    "/client/game/profile/create",
+)
+async def create_profile(
+    profile_create: schema.ProfileCreate,
+    account: Account = Depends(get_account),
+    command: ProfileCreateCommand = Depends(),
+) -> None:
+    await command.execute(account=account, profile_create=profile_create)

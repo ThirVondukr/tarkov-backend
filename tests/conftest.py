@@ -1,6 +1,10 @@
 import asyncio
 import itertools
+import pathlib
+import shutil
+import time
 import uuid
+from unittest import mock
 
 import httpx
 import orjson
@@ -13,7 +17,6 @@ import settings
 from app import create_app
 from database.base import Base, Session
 from database.models import Account
-from modules.profile.services import ProfileService
 from tests.utils import deflate_hook
 
 
@@ -41,6 +44,20 @@ async def http_client(app: FastAPI, base_url) -> httpx.AsyncClient:
         app=app,
         base_url=base_url,
         event_hooks={"response": [deflate_hook]},
+    )
+    async with client:
+        yield client
+
+
+@pytest.fixture
+async def authenticated_http_client(app: FastAPI, base_url: str, account: Account):
+    client = httpx.AsyncClient(
+        app=app,
+        base_url=base_url,
+        event_hooks={"response": [deflate_hook]},
+        cookies={
+            "PHPSESSID": account.profile_id,
+        },
     )
     async with client:
         yield client
@@ -109,6 +126,14 @@ async def account(session: AsyncSession) -> Account:
     return account
 
 
+@pytest.fixture
+def profile_dir(account: Account) -> pathlib.Path:
+    profile_path = paths.profiles.joinpath(account.profile_id)
+    profile_path.mkdir(exist_ok=True)
+    yield profile_path
+    shutil.rmtree(profile_path)
+
+
 @pytest.fixture(params=["ru", "en"])
 def language(request) -> str:
     return request.param
@@ -126,3 +151,10 @@ def templates() -> list[dict]:
 @pytest.fixture(scope="session")
 def templates_as_dict(templates) -> dict[str, dict]:
     return {tpl["_id"]: tpl for tpl in templates}
+
+
+@pytest.fixture
+def freeze_time() -> float:
+    timestamp = time.time()
+    with mock.patch("time.time", return_value=timestamp):
+        yield timestamp
