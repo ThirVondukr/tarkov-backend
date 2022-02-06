@@ -11,6 +11,7 @@ from database.models import Account
 from modules.profile.schema import ProfileCreate
 from modules.profile.services import ProfileService
 from modules.profile.types import Profile
+from utils import generate_id
 
 
 class ProfileCreateCommand:
@@ -28,6 +29,9 @@ class ProfileCreateCommand:
         profile_create: ProfileCreate,
     ) -> None:
         character = await self._create_character(account, profile_create)
+        character.inventory = await self._starting_inventory(
+            account.edition, profile_create.side
+        )
 
         account.profile_nickname = profile_create.nickname
         account.should_wipe = False
@@ -63,3 +67,36 @@ class ProfileCreateCommand:
         character.info.registration_date = int(time.time())
 
         return character
+
+    async def _starting_inventory(self, edition: str, side: str) -> dict:
+        path = paths.database.joinpath(
+            "starting_profiles", edition, f"inventory_{side}.json"
+        )
+        async with aiofiles.open(path) as f:
+            inventory = orjson.loads(await f.read())
+            self._regenerate_inventory(inventory)
+            assert isinstance(inventory, dict)
+            return inventory
+
+    @staticmethod
+    def _regenerate_inventory(inventory: dict) -> None:
+        ids_map = {}
+        for item in inventory["items"]:
+            new_id = generate_id()
+            ids_map[item["_id"]] = new_id
+            item["_id"] = new_id
+
+        for item in inventory["items"]:
+            if "parentId" not in item:
+                continue
+            item["parentId"] = ids_map[item["parentId"]]
+
+        keys = [
+            "equipment",
+            "questRaidItems",
+            "questStashItems",
+            "sortingTable",
+            "stash",
+        ]
+        for key in keys:
+            inventory[key] = ids_map[inventory[key]]

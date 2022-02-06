@@ -7,12 +7,13 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+import paths
 from database.models import Account
 from utils import generate_id
 
 endpoint_url = "/client/game/profile/create"
 
-pytestmark = [pytest.mark.usefixtures("profile_dir", "freeze_time")]
+pytestmark = [pytest.mark.usefixtures("profile_dir")]
 
 
 @pytest.fixture(params=["Usec", "Bear"])
@@ -68,7 +69,7 @@ async def test_should_update_account_model(
     assert account.should_wipe is False
 
 
-async def test_should_create_profile_file(
+def test_should_create_profile_file(
     response: httpx.Response,
     profile_dir: Path,
     account: Account,
@@ -93,3 +94,36 @@ async def test_should_create_profile_file(
     assert character["Info"]["RegistrationDate"] == int(freeze_time)
 
     assert character["Customization"]["Head"] == head_id
+
+
+def test_should_add_inventory(
+    response: httpx.Response,
+    profile_dir: Path,
+    account: Account,
+    side: str,
+):
+    starting_inventory_path = paths.database.joinpath(
+        "starting_profiles",
+        account.edition,
+        f"inventory_{side.lower()}.json",
+    )
+    with starting_inventory_path.open(encoding="utf8") as f:
+        starting_inventory = orjson.loads(f.read())
+
+    with profile_dir.joinpath("character.json").open(encoding="utf8") as f:
+        character = orjson.loads(f.read())
+    inventory = character["Inventory"]
+
+    exclude_keys = ("_id", "parentId")
+
+    assert len(starting_inventory["items"]) == len(inventory["items"])
+    for starting_item, item in zip(starting_inventory["items"], inventory["items"]):
+        assert starting_item["_id"] != item["_id"]
+        if "parentId" in starting_item or "parentId" in item:
+            assert starting_item["parentId"] != item["parentId"]
+
+        starting_item = {
+            k: v for k, v in starting_item.items() if k not in exclude_keys
+        }
+        item = {k: v for k, v in item.items() if k not in exclude_keys}
+        assert starting_item == item
