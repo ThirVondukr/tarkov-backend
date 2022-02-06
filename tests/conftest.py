@@ -11,6 +11,7 @@ import orjson
 import pytest
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from starlette import status
 
 import paths
 import settings
@@ -35,7 +36,7 @@ def app() -> FastAPI:
 
 @pytest.fixture(scope="session")
 def base_url() -> str:
-    return "http://test"
+    return "https://test"
 
 
 @pytest.fixture(scope="session")
@@ -132,6 +133,21 @@ def profile_dir(account: Account) -> pathlib.Path:
     profile_path.mkdir(exist_ok=True)
     yield profile_path
     shutil.rmtree(profile_path)
+
+
+@pytest.fixture
+@pytest.mark.usefixtures("profile_dir")
+async def profile(account: Account, authenticated_http_client: httpx.AsyncClient):
+    response = await authenticated_http_client.post(
+        "/client/game/profile/create",
+        json={
+            "side": "Usec",
+            "nickname": account.username,
+            "headId": "",
+            "voiceId": "",
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.fixture(params=["ru", "en"])
