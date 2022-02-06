@@ -1,6 +1,10 @@
+import datetime
+import random
 from types import NoneType
 from typing import Any
 
+import aiofiles
+import orjson
 from fastapi import APIRouter, Depends, Request
 
 import paths
@@ -79,9 +83,17 @@ async def client_customization() -> Success[dict[str, Any]]:
 async def client_account_customization() -> Success[list[str]]:
     """
     Returns list of all customization id's
+    route should not return id's of items that have Node _type, only Item
     """
+    available_customization_ids: list[str] = []
     customization_files = paths.customization.glob("*.json")
-    return Success(data=[file.stem for file in customization_files])
+    for customization_file in customization_files:
+        async with aiofiles.open(customization_file) as f:
+            contents = orjson.loads(await f.read())
+            if contents["_type"] == "Item":
+                available_customization_ids.append(contents["_id"])
+
+    return Success(data=available_customization_ids)
 
 
 @router.post("/client/globals", response_model=Success[dict])
@@ -94,3 +106,62 @@ async def client_globals() -> Success[dict]:
 async def client_settings() -> Success[dict]:
     path = paths.base.joinpath("client_settings.json")
     return Success(data=await read_json_file(path))
+
+
+@router.post("/client/weather", response_model=Success[dict])
+async def client_weather() -> Success[dict]:
+    weather_file_paths = list(paths.database.joinpath("weather").rglob("*.json"))
+    weather = await read_json_file(random.choice(weather_file_paths))
+
+    now = datetime.datetime.now()
+
+    delta = datetime.timedelta(
+        hours=now.hour,
+        minutes=now.minute,
+        seconds=now.second,
+        microseconds=now.microsecond,
+    )
+    accelerated_time = now + delta * weather["acceleration"]
+    accelerated_time.replace(
+        year=now.year,
+        month=now.month,
+        day=now.day,
+    )
+
+    date_str = accelerated_time.strftime("%Y-%m-%d")
+    time_str = accelerated_time.strftime("%H:%M:%S")
+
+    weather["weather"]["timestamp"] = int(now.timestamp())
+    weather["weather"]["date"] = date_str
+    weather["date"] = date_str
+
+    weather["weather"]["time"] = f"{date_str} {time_str}"
+    weather["time"] = time_str
+
+    return Success(data=weather)
+
+
+@router.post("/client/locations", response_model=Success[dict[str, dict]])
+async def client_locations() -> Success[dict[str, dict]]:
+    location_bases = paths.database.joinpath("locations", "base").rglob("*.json")
+    locations = [await read_json_file(path) for path in location_bases]
+    return Success(data={loc["_Id"]: loc for loc in locations})
+
+
+@router.post(
+    "/client/handbook/builds/my/list",
+    response_model=Success[list],
+)
+async def builds_list() -> Success[list]:
+    """Route should return list of user builds, currently not implemented"""
+    return Success(data=[])
+
+
+@router.post("/client/server/list", response_model=Success[dict])
+async def server_list(request: Request) -> Success[dict]:
+    return Success(
+        data={
+            "ip": utils.server_url(request),
+            "port": 443,
+        }
+    )

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import random
 import time
 from os import PathLike
 from pathlib import Path
@@ -39,6 +40,10 @@ def server_url(request: Request) -> str:
 async def read_json_file(path: PathLike[str]) -> Any:
     async with aiofiles.open(path, encoding="utf8") as file:
         return orjson.loads(await file.read())
+
+
+def generate_id() -> str:
+    return "".join(random.choices("0123456789abcdef", k=24))
 
 
 def generate_certificates(directory: Path) -> None:

@@ -6,4 +6,5 @@ dist
 coverage.xml
 
 resources/certs
+resources/profiles/*
 resources/db.sqlite3
