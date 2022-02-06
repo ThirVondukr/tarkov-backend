@@ -172,5 +172,5 @@ def templates_as_dict(templates) -> dict[str, dict]:
 @pytest.fixture
 def freeze_time() -> float:
     timestamp = time.time()
-    with mock.patch("time.time", return_value=timestamp):
+    with mock.patch.object(time, "time", return_value=timestamp):
         yield timestamp
