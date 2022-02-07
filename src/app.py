@@ -34,8 +34,4 @@ def create_app() -> FastAPI:
     async def on_startup() -> None:
         await migrations.migrate()
 
-    @app.get("/")
-    async def hello_world() -> dict[str, str]:
-        return {"msg": "Hello World!"}
-
     return app
