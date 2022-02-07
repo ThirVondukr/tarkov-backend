@@ -6,6 +6,7 @@ from modules import (
     items,
     languages,
     launcher,
+    mail,
     notifier,
     profile,
     quests,
@@ -23,6 +24,7 @@ def create_app() -> FastAPI:
     app.include_router(router=items.router)
     app.include_router(router=languages.router)
     app.include_router(router=launcher.router)
+    app.include_router(router=mail.router)
     app.include_router(router=notifier.router)
     app.include_router(router=profile.router)
     app.include_router(router=quests.router)
