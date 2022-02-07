@@ -21,3 +21,11 @@ async def quest_list() -> Success[list]:
     path = paths.database.joinpath("quests", "quests.json")
     async with aiofiles.open(path, encoding="utf8") as f:
         return Success(data=orjson.loads(await f.read()))
+
+
+@router.post(
+    "/client/repeatalbeQuests/activityPeriods",
+    response_model=Success[list],
+)
+async def repeatable_quests() -> Success[list]:
+    return Success(data=[])
