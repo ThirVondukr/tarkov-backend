@@ -24,3 +24,13 @@ async def friend_list() -> Success[FriendListSchema]:
             in_ignore_list=[],
         )
     )
+
+
+@router.post("/client/friend/request/list/inbox", response_model=Success[list])
+async def inbox_list() -> Success[list]:
+    return Success(data=[])
+
+
+@router.post("/client/friend/request/list/outbox", response_model=Success[list])
+async def outbox_list() -> Success[list]:
+    return Success(data=[])
