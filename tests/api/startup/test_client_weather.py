@@ -8,6 +8,7 @@ endpoint_url = "/client/weather"
 
 
 @pytest.fixture
+@pytest.mark.usefixtures("freeze_time")
 async def response(http_client: httpx.AsyncClient) -> httpx.Response:
     return await http_client.post(endpoint_url)
 
