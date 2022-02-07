@@ -170,3 +170,11 @@ async def server_list(request: Request) -> Success[dict]:
 @router.post("/client/checkVersion", response_model=Success[dict])
 async def check_version() -> Success[dict]:
     return Success(data={"isvalid": True, "latestVersion": ""})
+
+
+@router.post(
+    "/player/health/sync",
+    response_model=Success[NoneType],
+)
+async def health_sync() -> Success[NoneType]:
+    return Success()
