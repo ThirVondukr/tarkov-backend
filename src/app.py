@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from database import migrations
 from modules import (
+    friends,
     hideout,
     items,
     languages,
@@ -20,6 +21,8 @@ from server.middleware import strip_unity_content_encoding
 def create_app() -> FastAPI:
     app = FastAPI()
     app.middleware("http")(strip_unity_content_encoding)
+
+    app.include_router(router=friends.router)
     app.include_router(router=hideout.router)
     app.include_router(router=items.router)
     app.include_router(router=languages.router)
