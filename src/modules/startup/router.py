@@ -165,3 +165,8 @@ async def server_list(request: Request) -> Success[dict]:
             "port": 443,
         }
     )
+
+
+@router.post("/client/checkVersion", response_model=Success[dict])
+async def check_version() -> Success[dict]:
+    return Success(data={"isvalid": True, "latestVersion": ""})
