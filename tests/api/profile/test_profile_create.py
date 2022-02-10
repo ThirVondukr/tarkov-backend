@@ -98,7 +98,7 @@ def test_should_create_profile_file(
     assert character["Info"]["LowerNickname"] == nickname.lower()
 
     assert character["Info"]["Voice"] == voice_id
-    assert character["Info"]["RegistrationDate"] == int(freeze_time)
+    assert character["Info"]["RegistrationDate"] == str(int(freeze_time))
 
     assert character["Customization"]["Head"] == head_id
 

@@ -41,8 +41,8 @@ class ProfileCreateCommand:
 
         profile_path = paths.profiles.joinpath(account.profile_id)
         profile_path.mkdir(exist_ok=True)
-        with profile_path.joinpath("character.json").open("wb") as f:
-            f.write(orjson.dumps(character.dict(by_alias=True)))
+        async with aiofiles.open(profile_path.joinpath("character.json"), "wb") as file:
+            await file.write(orjson.dumps(character.dict(by_alias=True)))
 
         return character
 
@@ -66,7 +66,7 @@ class ProfileCreateCommand:
         character.info.voice = profile_create.voice_id
         character.customization.head = profile_create.head_id
 
-        character.info.registration_date = int(time.time())
+        character.info.registration_date = str(int(time.time()))
 
         return character
 
