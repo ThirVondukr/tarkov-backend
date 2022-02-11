@@ -17,6 +17,7 @@ SQLAlchemy = "^1.4.31"
 aiosqlite = "^0.17.0"
 alembic = "^1.7.5"
 PyYAML = "^6.0"
+aioinject = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -31,7 +32,6 @@ coverage = {extras = ["toml"], version = "^6.3.1"}
 types-PyYAML = "^6.0.4"
 
 [tool.coverage.run]
-branch = true
 source = ["src"]
 command_line = "-m pytest"
 concurrency = ["greenlet", "thread"]
