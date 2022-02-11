@@ -38,6 +38,6 @@ async def test_returns_profile_if_exists(
 
     with profile_dir.joinpath("character.json").open(encoding="utf8") as f:
         character = orjson.loads(f.read())
-        character = Profile.parse_obj(character).dict(by_alias=True)
+        character = Profile.parse_obj(character).dict(by_alias=True, exclude_unset=True)
 
     assert response.json()["data"] == [character]

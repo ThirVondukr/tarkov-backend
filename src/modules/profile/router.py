@@ -26,6 +26,7 @@ router = APIRouter(
 @router.post(
     "/client/game/profile/list",
     response_model=Success[list[Profile]],
+    response_model_exclude_unset=True,
 )
 async def profile_list(
     profile_id: str = Depends(get_profile_id),

@@ -29,9 +29,6 @@ class ProfileCreateCommand:
         profile_create: ProfileCreate,
     ) -> Profile:
         character = await self._create_character(account, profile_create)
-        character.inventory = await self._starting_inventory(
-            account.edition, profile_create.side
-        )
 
         account.profile_nickname = profile_create.nickname
         account.should_wipe = False
@@ -42,7 +39,9 @@ class ProfileCreateCommand:
         profile_path = paths.profiles.joinpath(account.profile_id)
         profile_path.mkdir(exist_ok=True)
         async with aiofiles.open(profile_path.joinpath("character.json"), "wb") as file:
-            await file.write(orjson.dumps(character.dict(by_alias=True)))
+            await file.write(
+                orjson.dumps(character.dict(by_alias=True, exclude_unset=True))
+            )
 
         return character
 
@@ -53,7 +52,11 @@ class ProfileCreateCommand:
             "starting_profiles", account.edition, "character.json"
         )
         async with aiofiles.open(starting_character, encoding="utf8") as f:
-            character = Profile.parse_obj(orjson.loads(await f.read()))
+            data = orjson.loads(await f.read())
+            data["Inventory"] = await self._starting_inventory(
+                account.edition, profile_create.side
+            )
+            character = Profile.parse_obj(data)
 
         character.aid = account.profile_id
         character.id = f"pmc{account.profile_id}"

@@ -47,7 +47,7 @@ class _ProfileManager:
 
     async def _save_profile(self, profile_id: str, profile: Profile) -> None:
         profile_dir = self.profiles_path.joinpath(profile_id)
-        profile_data = profile.dict(by_alias=True)
+        profile_data = profile.dict(by_alias=True, exclude_unset=True)
 
         temp_path = profile_dir.joinpath(str(uuid.uuid4()))
         temp_path.parent.mkdir(parents=True, exist_ok=True)

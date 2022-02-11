@@ -1,7 +1,6 @@
-from typing import Any
-
 from pydantic import BaseModel, Extra, Field
 
+from modules.items.types import Item
 from utils import camel, pascal
 
 
@@ -44,13 +43,27 @@ class Profile(_BaseConfigModel):
         feet: str
         hands: str
 
+    class Inventory(BaseModel):
+        class Config:
+            alias_generator = camel
+            allow_population_by_field_name = True
+            extra = Extra.forbid
+
+        equipment: str
+        fast_panel: dict
+        quest_raid_items: str
+        quest_stash_items: str
+        stash: str
+        sorting_table: str
+        items: list[Item]
+
     id: str = Field(alias="_id")
     aid: str = Field(alias="aid")
     savage: str = Field(alias="savage")
     info: Info
     customization: Customization
     health: dict
-    inventory: Any
+    inventory: Inventory
     skills: dict
     stats: dict
     encyclopedia: dict[str, bool]
