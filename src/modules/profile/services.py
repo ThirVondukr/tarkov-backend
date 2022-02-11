@@ -3,18 +3,17 @@ import contextlib
 import shutil
 import uuid
 from collections import defaultdict
-from typing import AsyncIterator
+from typing import Annotated, AsyncIterator
 
 import aiofiles
 import orjson
-from fastapi import Depends
+from aioinject import Inject
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import paths
-from database.dependencies import get_session
 from database.models import Account
-from utils import Singleton, read_json_file
+from utils import read_json_file
 
 from .types import Profile
 
@@ -22,7 +21,7 @@ from .types import Profile
 class ProfileService:
     starting_profiles_path = paths.database.joinpath("starting_profiles")
 
-    def __init__(self, session: AsyncSession = Depends(get_session)):
+    def __init__(self, session: Annotated[AsyncSession, Inject]):
         self.session = session
 
     async def is_nickname_taken(self, nickname: str) -> bool:
@@ -33,7 +32,7 @@ class ProfileService:
         return username_taken
 
 
-class _ProfileManager:
+class ProfileManager:
     profiles_path = paths.profiles
 
     def __init__(self) -> None:
@@ -79,7 +78,3 @@ class _ProfileManager:
             except Exception:
                 del self.profiles[profile_id]
                 raise
-
-
-class ProfileManager(_ProfileManager, Singleton):
-    pass

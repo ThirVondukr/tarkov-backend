@@ -1,5 +1,7 @@
+from aioinject.ext.fastapi import InjectMiddleware
 from fastapi import FastAPI
 
+from container import create_container
 from database import migrations
 from modules import (
     friends,
@@ -21,6 +23,7 @@ from server.middleware import strip_unity_content_encoding
 def create_app() -> FastAPI:
     app = FastAPI()
     app.middleware("http")(strip_unity_content_encoding)
+    app.add_middleware(InjectMiddleware, container=create_container())
 
     app.include_router(router=friends.router)
     app.include_router(router=hideout.router)

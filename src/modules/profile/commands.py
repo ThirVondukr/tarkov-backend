@@ -1,12 +1,12 @@
 import time
+from typing import Annotated
 
 import aiofiles
 import orjson
-from fastapi import Depends
+from aioinject import Inject
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import paths
-from database.dependencies import get_session
 from database.models import Account
 from modules.profile.schema import ProfileCreate
 from modules.profile.services import ProfileService
@@ -17,8 +17,8 @@ from utils import generate_id
 class ProfileCreateCommand:
     def __init__(
         self,
-        session: AsyncSession = Depends(get_session),
-        profile_service: ProfileService = Depends(),
+        session: Annotated[AsyncSession, Inject],
+        profile_service: Annotated[ProfileService, Inject],
     ) -> None:
         self.session = session
         self.profile_service = profile_service

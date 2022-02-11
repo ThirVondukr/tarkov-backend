@@ -1,6 +1,8 @@
-from typing import NoReturn
+from typing import Annotated, NoReturn
 
 import pydantic
+from aioinject import Inject
+from aioinject.ext.fastapi import inject
 from fastapi import APIRouter, Depends, Request
 
 import paths
@@ -25,8 +27,9 @@ router = APIRouter(
     response_model=Success[dict[str, Template]],
     response_model_exclude_unset=True,
 )
+@inject
 async def client_items(
-    template_repository: TemplateRepository = Depends(),
+    template_repository: Annotated[TemplateRepository, Inject],
 ) -> Success[dict[str, Template]]:
     return Success(data=template_repository.templates)
 
