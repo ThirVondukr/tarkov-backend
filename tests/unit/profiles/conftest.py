@@ -4,12 +4,12 @@ import pytest
 
 import paths
 from database.models import Account
-from modules.profile.services import _ProfileManager
+from modules.profile.services import ProfileManager
 
 
 @pytest.fixture
-def profile_manager() -> _ProfileManager:
-    return _ProfileManager()
+def profile_manager() -> ProfileManager:
+    return ProfileManager()
 
 
 @pytest.fixture

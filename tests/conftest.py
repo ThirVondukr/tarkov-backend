@@ -18,6 +18,7 @@ import settings
 from app import create_app
 from database.base import Base, Session
 from database.models import Account
+from modules.items.repository import TemplateRepository, create_template_repository
 from tests.utils import deflate_hook
 
 
@@ -177,3 +178,8 @@ def freeze_time() -> float:
     timestamp = time.time()
     with mock.patch.object(time, "time", return_value=timestamp):
         yield timestamp
+
+
+@pytest.fixture(scope="session")
+async def template_repository() -> TemplateRepository:
+    return await create_template_repository()

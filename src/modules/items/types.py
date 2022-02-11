@@ -28,7 +28,7 @@ class Rotation(enum.Enum):
 class Location(BaseModel):
     class Config:
         extra = Extra.forbid
-        use_enum_values = True
+        allow_population_by_field_name = True
 
     is_searched: bool = Field(alias="isSearched", default=False)
     rotation: Rotation = Field(alias="r", default=Rotation.Horizontal)
@@ -44,6 +44,10 @@ class Location(BaseModel):
 
 
 class Item(BaseModel):
+    class Config:
+        validate_assignment = True
+        allow_population_by_field_name = True
+
     id: str = Field(alias="_id")
     template_id: str = Field(alias="_tpl")
     parent_id: str | None = Field(alias="parentId")
