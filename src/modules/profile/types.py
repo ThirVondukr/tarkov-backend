@@ -10,8 +10,15 @@ class InsuredItem(BaseModel, alias_generator=camel):
     item_id: str
 
 
-class Profile(BaseModel, alias_generator=pascal, extra=Extra.forbid):
-    class Info(BaseModel, alias_generator=pascal, extra=Extra.forbid):
+class _BaseConfigModel(BaseModel):
+    class Config:
+        alias_generator = pascal
+        extra = Extra.forbid
+        allow_population_by_field_name = True
+
+
+class Profile(_BaseConfigModel):
+    class Info(_BaseConfigModel):
         nickname: str
         lower_nickname: str
         side: str
@@ -31,7 +38,7 @@ class Profile(BaseModel, alias_generator=pascal, extra=Extra.forbid):
         nickname_change_date: int
         bans: list
 
-    class Customization(BaseModel, alias_generator=pascal, extra=Extra.forbid):
+    class Customization(_BaseConfigModel):
         head: str
         body: str
         feet: str

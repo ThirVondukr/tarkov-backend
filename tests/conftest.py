@@ -136,8 +136,11 @@ def profile_dir(account: Account) -> pathlib.Path:
 
 
 @pytest.fixture
-@pytest.mark.usefixtures("profile_dir")
-async def profile(account: Account, authenticated_http_client: httpx.AsyncClient):
+async def profile(
+    account: Account,
+    authenticated_http_client: httpx.AsyncClient,
+    profile_dir,
+):
     response = await authenticated_http_client.post(
         "/client/game/profile/create",
         json={
