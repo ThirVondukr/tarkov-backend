@@ -15,3 +15,8 @@ class ZLibRequest(Request):
             except zlib.error:
                 self._body = body
         return self._body
+
+
+class FileRequest(Request):
+    async def body(self) -> bytes:
+        return self._body

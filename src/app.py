@@ -13,6 +13,7 @@ from modules import (
     quests,
     singleplayer,
     startup,
+    static,
     trading,
 )
 from server.middleware import strip_unity_content_encoding
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
     app = FastAPI()
     app.middleware("http")(strip_unity_content_encoding)
 
+    app.include_router(router=static.router)
     app.include_router(router=friends.router)
     app.include_router(router=hideout.router)
     app.include_router(router=items.router)

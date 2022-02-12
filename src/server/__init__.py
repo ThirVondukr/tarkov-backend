@@ -1,5 +1,7 @@
-from .requests import ZLibRequest
+from .requests import ZLibRequest, FileRequest
 from .responses import ZLibORJSONResponse
-from .routes import ZLibRoute
+from .routes import ZLibRoute, FileRoute
 
-__all__ = ["ZLibRequest", "ZLibORJSONResponse", "ZLibRoute"]
+from fastapi.responses import FileResponse
+
+__all__ = ["ZLibRequest", "ZLibORJSONResponse", "ZLibRoute", "FileRequest", "FileResponse", "FileRoute"]
