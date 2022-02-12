@@ -1,4 +1,5 @@
 import enum
+from collections import defaultdict
 from typing import Iterable
 
 from modules.items.actions import To
@@ -36,7 +37,7 @@ class Inventory:
         self.items = {item.id: item for item in items}
         self.root_id = root_id
         self.tpl_repository = template_repository
-        self.taken_locations: set[tuple[int, int]] = set()
+        self.taken_locations: dict[str, set[tuple[int, int]]] = defaultdict(set)
 
     @classmethod
     def from_container(
@@ -78,6 +79,17 @@ class Inventory:
             for y in range(location.y, location.y + height):
                 yield x, y
 
+    def children(self, parent: Item, include_self: bool) -> Iterable[Item]:
+        stack = [item for item in self.items.values() if item.parent_id == parent.id]
+        if include_self:
+            yield parent
+        while stack:
+            child = stack.pop()
+            yield child
+            stack.extend(
+                item for item in self.items.values() if item.parent_id == child.id
+            )
+
     def item_size(
         self, item: Item, location: Location | None = None
     ) -> tuple[int, int]:
@@ -96,6 +108,21 @@ class Inventory:
         item.parent_id = to.id
 
         for point in self._item_points(item=item, location=to.location):
-            if point in self.taken_locations:
+            if point in self.taken_locations[to.id]:
                 raise SlotTakenError
-            self.taken_locations.add(point)
+            self.taken_locations[to.id].add(point)
+
+    def remove_item(self, item: Item) -> None:
+
+        del self.items[item.id]
+        for point in self._item_points(item=item, location=item.location):
+            self.taken_locations[item.parent_id].remove(point)
+            try:
+                del self.taken_locations[item.id]
+            except KeyError:
+                pass
+
+        for child in self.children(item, include_self=False):
+            del self.items[child.id]
+            if child.id in self.taken_locations:
+                del self.taken_locations[child.id]

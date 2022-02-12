@@ -4,8 +4,8 @@ import itertools
 from pathlib import Path
 from typing import Iterable
 
+import orjson
 import pydantic
-from orjson import orjson
 
 import paths
 
