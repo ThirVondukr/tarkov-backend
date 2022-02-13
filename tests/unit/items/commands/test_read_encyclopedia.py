@@ -3,12 +3,12 @@ import copy
 import pytest
 
 from modules.items.actions import ReadEncyclopedia
-from modules.items.commands import ReadEncyclopediaCommand
+from modules.items.commands import ReadEncyclopediaHandler
 
 
 @pytest.fixture
 def command():
-    return ReadEncyclopediaCommand({})
+    return ReadEncyclopediaHandler({})
 
 
 async def test_empty(command):
