@@ -1,3 +1,5 @@
+import logging
+
 from aioinject.ext.fastapi import InjectMiddleware
 from fastapi import FastAPI
 
@@ -17,12 +19,16 @@ from modules import (
     startup,
     trading,
 )
-from server.middleware import strip_unity_content_encoding
+from server.middleware import measure_execution_time, strip_unity_content_encoding
 
 
 def create_app() -> FastAPI:
+    logging.getLogger("uvicorn").propagate = False
+    logging.basicConfig(level=logging.INFO)
+
     app = FastAPI()
     app.middleware("http")(strip_unity_content_encoding)
+    app.middleware("http")(measure_execution_time)
     app.add_middleware(InjectMiddleware, container=create_container())
 
     app.include_router(router=friends.router)
