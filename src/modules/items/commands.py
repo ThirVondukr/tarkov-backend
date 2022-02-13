@@ -1,5 +1,6 @@
 import functools
-from typing import Awaitable, Callable
+from builtins import type
+from typing import Any, Awaitable, Callable
 
 from modules.items.actions import (
     Action,
@@ -7,6 +8,7 @@ from modules.items.actions import (
     ProfileChanges,
     ReadEncyclopedia,
     Remove,
+    Split,
     To,
 )
 from modules.items.inventory import PlayerInventory
@@ -15,10 +17,10 @@ from modules.profile.types import Profile
 
 
 class ActionHandler:
-    actions_map: dict[type[Action], Callable[[Action], Awaitable[None]]]
+    actions_map: dict[Any, Callable[[Any], Awaitable[None]]]
 
     @functools.cached_property
-    def actions(self) -> tuple[type[Action], ...]:
+    def actions(self) -> tuple[type, ...]:
         return tuple(self.actions_map)
 
     async def execute(self, action: Action) -> None:
@@ -48,6 +50,7 @@ class InventoryActionHandler(ActionHandler):
         self.actions_map = {
             Move: self.move,
             Remove: self.remove,
+            Split: self.split,
         }
 
     async def move(self, action: Move) -> None:
@@ -72,6 +75,16 @@ class InventoryActionHandler(ActionHandler):
             self.profile_changes.items.del_.append(child)
 
         self.inventory.remove_item(item)
+
+    async def split(self, action: Split) -> None:
+        item = self.inventory.get(action.item)
+        new_item = self.inventory.split(
+            item,
+            to=action.container,
+            count=action.count,
+        )
+        self.profile_changes.items.change.append(item)
+        self.profile_changes.items.new.append(new_item)
 
 
 class ActionExecutor:

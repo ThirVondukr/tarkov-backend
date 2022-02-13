@@ -28,6 +28,9 @@ class SlotTakenError(InventoryError):
     pass
 
 
+STACK_COUNT = "StackObjectsCount"
+
+
 def iter_children(parent_id: str, items: Iterable[Item]) -> Iterable[Item]:
     if not isinstance(items, list):
         items = list(items)
@@ -38,6 +41,16 @@ def iter_children(parent_id: str, items: Iterable[Item]) -> Iterable[Item]:
         child = stack.pop()
         yield child
         stack.extend(item for item in items if item.parent_id == child.id)
+
+
+def item_size(
+    parent: Item,
+    # children: list[Item],
+    template_repository: TemplateRepository,
+) -> tuple[int, int]:
+    template = template_repository.get(parent.template_id)
+    width, height = template.props["Width"], template.props["Height"]
+    return width, height
 
 
 class Inventory:
@@ -74,6 +87,7 @@ class Inventory:
         return self.items[item_id]
 
     def _check_out_of_bounds(self, item: Item, to: To) -> None:
+        assert to.location is not None
         if to.location.x < 0 or to.location.y < 0:
             raise OutOfBoundsError
 
@@ -105,8 +119,7 @@ class Inventory:
     def item_size(
         self, item: Item, location: Location | None = None
     ) -> tuple[int, int]:
-        template = self.tpl_repository.get(item.template_id)
-        width, height = template.props["Width"], template.props["Height"]
+        width, height = item_size(item, self.tpl_repository)
         if location is not None and location.rotation is Rotation.Vertical:
             width, height = height, width
         return width, height
@@ -143,19 +156,41 @@ class Inventory:
         except KeyError:
             pass
 
+        assert item.parent_id
+        assert item.slot_id
+
         if item.location is None:
             del self.taken_locations[item.parent_id][item.slot_id]
-        else:
+        elif isinstance(item.location, Location):
             occupied_cells = self.taken_locations[item.parent_id][item.slot_id]
             assert isinstance(occupied_cells, set)
 
             for point in self._item_points(item=item, location=item.location):
                 occupied_cells.remove(point)
+        else:
+            raise ValueError
 
         for child in self.children(item, include_self=False):
             del self.items[child.id]
             if child.id in self.taken_locations:
                 del self.taken_locations[child.id]
+
+    def split(self, item: Item, to: To, count: int) -> Item:
+        if count <= 0:
+            raise ValueError
+
+        if item.upd.get(STACK_COUNT, 0) <= count:
+            raise ValueError
+        item.upd[STACK_COUNT] -= count
+
+        new_item = item.copy(deep=True)
+        new_item.id = generate_id()
+        new_item.upd[STACK_COUNT] = count
+        self.add_item(
+            new_item,
+            to=to,
+        )
+        return new_item
 
 
 class PlayerInventory(Inventory):

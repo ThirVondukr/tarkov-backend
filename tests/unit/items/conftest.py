@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 
 from modules.items.inventory import Inventory, Stash

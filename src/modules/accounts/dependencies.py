@@ -17,7 +17,7 @@ async def get_account(
     profile_id: str = Depends(get_profile_id),
 ) -> Account:
     stmt = select(Account).filter(Account.profile_id == profile_id)
-    account = await session.scalar(stmt)
+    account: Account = await session.scalar(stmt)
     if account is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     return account
