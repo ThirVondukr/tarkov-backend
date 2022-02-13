@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 
 import paths
@@ -10,6 +12,7 @@ def main() -> None:
     uvicorn.run(
         "app:create_app",
         port=443,
+        reload=bool(os.environ.get("RELOAD")),
         factory=True,
         use_colors=False,
         ssl_keyfile="resources/certs/key.pem",

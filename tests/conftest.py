@@ -18,6 +18,9 @@ import settings
 from app import create_app
 from database.base import Base, Session
 from database.models import Account
+from modules.items.repository import TemplateRepository, create_template_repository
+from modules.profile.services import ProfileManager
+from modules.profile.types import Profile
 from tests.utils import deflate_hook
 
 
@@ -136,10 +139,16 @@ def profile_dir(account: Account) -> pathlib.Path:
 
 
 @pytest.fixture
-async def profile(
+def profile_manager() -> ProfileManager:
+    return ProfileManager()
+
+
+@pytest.fixture
+async def create_profile(
     account: Account,
     authenticated_http_client: httpx.AsyncClient,
     profile_dir,
+    profile_manager: ProfileManager,
 ):
     response = await authenticated_http_client.post(
         "/client/game/profile/create",
@@ -151,6 +160,17 @@ async def profile(
         },
     )
     assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.fixture
+async def profile(
+    profile_manager: ProfileManager, account: Account, create_profile
+) -> Profile:
+    async with profile_manager.profile(
+        account.profile_id,
+        readonly=True,
+    ) as profile:
+        yield profile
 
 
 @pytest.fixture(params=["ru", "en"])
@@ -177,3 +197,8 @@ def freeze_time() -> float:
     timestamp = time.time()
     with mock.patch.object(time, "time", return_value=timestamp):
         yield timestamp
+
+
+@pytest.fixture(scope="session")
+async def template_repository() -> TemplateRepository:
+    return await create_template_repository()

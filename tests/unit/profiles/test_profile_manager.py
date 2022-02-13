@@ -5,16 +5,16 @@ import pytest
 
 import paths
 from database.models import Account
-from modules.profile.services import _ProfileManager
+from modules.profile.services import ProfileManager
 from modules.profile.types import Profile
 from tests.utils import tmp_dir
 from utils import generate_id, read_json_file
 
-pytestmark = [pytest.mark.usefixtures("profile")]
+pytestmark = [pytest.mark.usefixtures("create_profile")]
 
 
 async def test_read(
-    profile_manager: _ProfileManager,
+    profile_manager: ProfileManager,
     account: Account,
     profile_path: Path,
 ):
@@ -26,7 +26,7 @@ async def test_read(
 
 
 async def test_save(
-    profile_manager: _ProfileManager,
+    profile_manager: ProfileManager,
     account: Account,
     profile_path: Path,
 ):
@@ -45,7 +45,7 @@ async def test_save(
 
 
 async def test_context_manager_read(
-    profile_manager: _ProfileManager,
+    profile_manager: ProfileManager,
     account: Account,
     profile_path: Path,
 ):
@@ -55,7 +55,7 @@ async def test_context_manager_read(
 
 
 async def test_context_manager_save(
-    profile_manager: _ProfileManager,
+    profile_manager: ProfileManager,
     account: Account,
     profile_path: Path,
 ):
@@ -68,7 +68,7 @@ async def test_context_manager_save(
 
 
 async def test_context_manager_should_not_save_on_exception(
-    profile_manager: _ProfileManager,
+    profile_manager: ProfileManager,
     account: Account,
     profile_path: Path,
 ):

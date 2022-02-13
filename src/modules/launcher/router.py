@@ -1,7 +1,9 @@
 import zlib
-from typing import Optional
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, Request
+from aioinject import Inject
+from aioinject.ext.fastapi import inject
+from fastapi import APIRouter, Request
 from fastapi.responses import PlainTextResponse
 
 import settings
@@ -24,9 +26,10 @@ router = APIRouter(
     "/launcher/server/connect",
     response_model=schema.ServerInfo,
 )
+@inject
 async def connect(
     request: Request,
-    editions_service: EditionsService = Depends(),
+    editions_service: Annotated[EditionsService, Inject],
 ) -> schema.ServerInfo:
     return schema.ServerInfo(
         name=settings.server.name,
@@ -36,9 +39,10 @@ async def connect(
 
 
 @router.post("/launcher/profile/register")
+@inject
 async def create_account(
     account_in: AccountCreate,
-    account_service: AccountService = Depends(AccountService),
+    account_service: Annotated[AccountService, Inject],
 ) -> PlainTextResponse:
     if await account_service.is_username_taken(account_in.username):
         return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
@@ -48,9 +52,10 @@ async def create_account(
 
 
 @router.post("/launcher/profile/login")
+@inject
 async def login(
     account_in: AccountLogin,
-    account_service: AccountService = Depends(AccountService),
+    account_service: Annotated[AccountService, Inject],
 ) -> PlainTextResponse:
     user = await account_service.login(account_in)
     if user is None:
@@ -62,8 +67,9 @@ async def login(
     "/launcher/profile/get",
     response_model=AccountSchema,
 )
+@inject
 async def get_profile(
     account_in: AccountLogin,
-    account_service: AccountService = Depends(AccountService),
+    account_service: Annotated[AccountService, Inject],
 ) -> Optional[Account]:
     return await account_service.login(account_in)

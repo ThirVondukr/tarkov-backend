@@ -29,15 +29,13 @@ async def test_profile_is_not_created_yet(authenticated_http_client: httpx.Async
     assert response.json()["data"] == []
 
 
-@pytest.mark.usefixtures("profile")
+@pytest.mark.usefixtures("create_profile")
 async def test_returns_profile_if_exists(
     authenticated_http_client: httpx.AsyncClient,
     profile_dir: Path,
 ):
     response = await authenticated_http_client.post(url)
 
-    with profile_dir.joinpath("character.json").open(encoding="utf8") as f:
-        character = orjson.loads(f.read())
-        character = Profile.parse_obj(character).dict(by_alias=True)
-
-    assert response.json()["data"] == [character]
+    path = profile_dir.joinpath("character.json")
+    character = Profile.parse_file(path).json(by_alias=True, exclude_unset=True)
+    assert response.json()["data"] == [orjson.loads(character)]

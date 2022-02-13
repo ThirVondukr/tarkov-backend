@@ -1,10 +1,12 @@
 import datetime
 import random
 from types import NoneType
-from typing import Any
+from typing import Annotated, Any
 
 import aiofiles
 import orjson
+from aioinject import Inject
+from aioinject.ext.fastapi import inject
 from fastapi import APIRouter, Depends, Request
 
 import paths
@@ -36,10 +38,11 @@ async def client_game_version_validate() -> Success[NoneType]:
 
 
 @router.post("/client/game/config")
+@inject
 async def client_game_config(
     request: Request,
+    language_service: Annotated[LanguageService, Inject],
     profile_id: str = Depends(get_profile_id),
-    language_service: LanguageService = Depends(),
 ) -> Success[schema.ClientGameConfig]:
     config = schema.ClientGameConfig(
         aid=profile_id,

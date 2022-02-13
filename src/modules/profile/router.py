@@ -1,3 +1,7 @@
+from typing import Annotated
+
+from aioinject import Inject
+from aioinject.ext.fastapi import inject
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
@@ -26,6 +30,7 @@ router = APIRouter(
 @router.post(
     "/client/game/profile/list",
     response_model=Success[list[Profile]],
+    response_model_exclude_unset=True,
 )
 async def profile_list(
     profile_id: str = Depends(get_profile_id),
@@ -81,11 +86,11 @@ async def nickname_reserved() -> Success[str]:
 
 @router.post(
     "/client/game/profile/nickname/validate",
-    response_model=Success[dict] | Error,
+    response_model=Success[dict],
 )
+@inject
 async def nickname_validate(
-    request: Request,
-    profile_service: ProfileService = Depends(),
+    request: Request, profile_service: Annotated[ProfileService, Inject]
 ) -> Success[dict] | Error:
     nickname = (await request.body()).decode()
     if len(nickname) <= 3:
@@ -98,10 +103,11 @@ async def nickname_validate(
 
 
 @router.post("/client/game/profile/create", response_model=Success[dict])
+@inject
 async def create_profile(
     profile_create: schema.ProfileCreate,
+    command: Annotated[ProfileCreateCommand, Inject],
     account: Account = Depends(get_account),
-    command: ProfileCreateCommand = Depends(),
 ) -> Success[dict]:
     profile = await command.execute(account=account, profile_create=profile_create)
     return Success(data={"uid": profile.id})
