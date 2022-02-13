@@ -5,6 +5,7 @@ from typing import Iterable
 from modules.items.actions import To
 from modules.items.repository import TemplateRepository
 from modules.items.types import Item, Location, Rotation
+from modules.profile.types import Profile
 from utils import generate_id
 
 
@@ -27,6 +28,18 @@ class SlotTakenError(InventoryError):
     pass
 
 
+def iter_children(parent_id: str, items: Iterable[Item]) -> Iterable[Item]:
+    if not isinstance(items, list):
+        items = list(items)
+
+    stack = [item for item in items if item.parent_id == parent_id]
+
+    while stack:
+        child = stack.pop()
+        yield child
+        stack.extend(item for item in items if item.parent_id == child.id)
+
+
 class Inventory:
     def __init__(
         self,
@@ -37,7 +50,9 @@ class Inventory:
         self.items = {item.id: item for item in items}
         self.root_id = root_id
         self.tpl_repository = template_repository
-        self.taken_locations: dict[str, set[tuple[int, int]]] = defaultdict(set)
+        self.taken_locations: dict[str, dict[str, set[tuple[int, int]]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
 
     @classmethod
     def from_container(
@@ -80,15 +95,12 @@ class Inventory:
                 yield x, y
 
     def children(self, parent: Item, include_self: bool) -> Iterable[Item]:
-        stack = [item for item in self.items.values() if item.parent_id == parent.id]
+        children = iter_children(parent.id, self.items.values())
+
         if include_self:
             yield parent
-        while stack:
-            child = stack.pop()
-            yield child
-            stack.extend(
-                item for item in self.items.values() if item.parent_id == child.id
-            )
+
+        yield from children
 
     def item_size(
         self, item: Item, location: Location | None = None
@@ -100,29 +112,92 @@ class Inventory:
         return width, height
 
     def add_item(self, item: Item, to: To) -> None:
-        self._check_out_of_bounds(item=item, to=to)
+        if item.id in self.items:
+            raise ValueError
 
         self.items[item.id] = item
         item.location = to.location
         item.slot_id = to.container
         item.parent_id = to.id
 
+        if to.location is None:
+            return
+
+        self._check_out_of_bounds(item=item, to=to)
         for point in self._item_points(item=item, location=to.location):
-            if point in self.taken_locations[to.id]:
+            if point in self.taken_locations[to.id][to.container]:
                 raise SlotTakenError
-            self.taken_locations[to.id].add(point)
+            self.taken_locations[to.id][to.container].add(point)
 
     def remove_item(self, item: Item) -> None:
-
         del self.items[item.id]
-        for point in self._item_points(item=item, location=item.location):
-            self.taken_locations[item.parent_id].remove(point)
-            try:
-                del self.taken_locations[item.id]
-            except KeyError:
-                pass
+        try:
+            del self.taken_locations[item.id]
+        except KeyError:
+            pass
+
+        if item.location is not None:
+            for point in self._item_points(item=item, location=item.location):
+                self.taken_locations[item.parent_id][item.slot_id].remove(point)
 
         for child in self.children(item, include_self=False):
             del self.items[child.id]
             if child.id in self.taken_locations:
                 del self.taken_locations[child.id]
+
+
+class PlayerInventory(Inventory):
+    def __init__(
+        self,
+        items: list[Item],
+        template_repository: TemplateRepository,
+        root_id: str,
+        equipment_id: str,
+        quest_raid_items_id: str,
+        quest_stash_items_id: str,
+        sorting_table_id: str,
+    ):
+        super().__init__(
+            items=items, root_id=root_id, template_repository=template_repository
+        )
+        self.equipment_id = equipment_id
+        self.quest_raid_items_id = quest_raid_items_id
+        self.quest_stash_items_id = quest_stash_items_id
+        self.sorting_table_id = sorting_table_id
+
+    @classmethod
+    def from_profile_inventory(
+        cls,
+        profile_inventory: Profile.Inventory,
+        template_repository: TemplateRepository,
+    ) -> "PlayerInventory":
+        root_ids = {
+            profile_inventory.stash,
+            profile_inventory.equipment,
+            profile_inventory.quest_raid_items,
+            profile_inventory.quest_stash_items,
+            profile_inventory.sorting_table,
+        }
+        root_items = [i for i in profile_inventory.items if i.id in root_ids]
+        assert len(root_items) == len(root_ids)
+
+        inventory = cls(
+            items=root_items,
+            template_repository=template_repository,
+            root_id=profile_inventory.stash,
+            equipment_id=profile_inventory.equipment,
+            quest_raid_items_id=profile_inventory.quest_raid_items,
+            quest_stash_items_id=profile_inventory.quest_stash_items,
+            sorting_table_id=profile_inventory.sorting_table,
+        )
+        for root_id in root_ids:
+            for child in iter_children(root_id, profile_inventory.items):
+                inventory.add_item(
+                    item=child,
+                    to=To(
+                        id=child.parent_id,
+                        container=child.slot_id,
+                        location=child.location,
+                    ),
+                )
+        return inventory

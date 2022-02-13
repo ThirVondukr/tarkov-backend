@@ -29,7 +29,7 @@ async def test_profile_is_not_created_yet(authenticated_http_client: httpx.Async
     assert response.json()["data"] == []
 
 
-@pytest.mark.usefixtures("profile")
+@pytest.mark.usefixtures("create_profile")
 async def test_returns_profile_if_exists(
     authenticated_http_client: httpx.AsyncClient,
     profile_dir: Path,

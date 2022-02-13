@@ -9,11 +9,7 @@ from modules.items.types import Item, Location, Rotation
 from utils import generate_id
 
 
-def test_can_create(inventory):
-    assert inventory
-
-
-def test_can_move_item(
+def test_can_add_item(
     template_repository: TemplateRepository,
     inventory: Inventory,
 ):
@@ -26,10 +22,7 @@ def test_can_move_item(
         to=To(
             id=inventory.root_id,
             container="hideout",
-            location=Location(
-                x=0,
-                y=0,
-            ),
+            location=Location(x=0, y=0),
         ),
     )
 
@@ -39,6 +32,33 @@ def test_can_move_item(
 
     assert inventory.items[item.id] == item
     assert len(inventory.items) == 2
+
+
+def test_add_twice(
+    template_repository: TemplateRepository,
+    inventory: Inventory,
+):
+    item = Item(
+        id=generate_id(),
+        template_id=template_repository.find(name="item_barter_flam_propane").id,
+    )
+    inventory.add_item(
+        item,
+        to=To(
+            id=inventory.root_id,
+            container="hideout",
+            location=Location(x=0, y=0),
+        ),
+    )
+    with pytest.raises(ValueError):
+        inventory.add_item(
+            item,
+            to=To(
+                id=inventory.root_id,
+                container="hideout",
+                location=Location(x=0, y=0),
+            ),
+        )
 
 
 @pytest.mark.parametrize(
@@ -184,44 +204,6 @@ def test_items_intersecting(
         )
 
 
-def test_remove_item(
-    template_repository: TemplateRepository,
-    inventory: Inventory,
-):
-    template = template_repository.find(name="car_battery")
-    item = Item(
-        id=generate_id(),
-        template_id=template.id,
-    )
-    inventory.add_item(
-        item=item,
-        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
-    )
-
-    inventory.remove_item(item)
-    assert item.id not in inventory.items
-
-
-def test_remove_item_roundtrip(
-    template_repository: TemplateRepository,
-    inventory: Inventory,
-):
-    template = template_repository.find(name="car_battery")
-    for _ in range(5):
-        item = Item(
-            id=generate_id(),
-            template_id=template.id,
-        )
-        inventory.add_item(
-            item=item,
-            to=To(
-                id=inventory.root_id, container="hideout", location=Location(x=0, y=0)
-            ),
-        )
-
-        inventory.remove_item(item)
-
-
 def test_add_item_into_nested_inventory(
     template_repository: TemplateRepository,
     inventory: Inventory,
@@ -293,33 +275,3 @@ def test_place_nested_out_of_bounds(
                 location=Location(x=x, y=y, rotation=rotation),
             ),
         )
-
-
-def test_remove_nested(
-    template_repository: TemplateRepository,
-    inventory: Inventory,
-):
-    mbss = Item(
-        id=generate_id(),
-        template_id=template_repository.find(name="standartBackpack").id,
-    )
-    car_battery = Item(
-        id=generate_id(),
-        template_id=template_repository.find(name="car_battery").id,
-    )
-    inventory.add_item(
-        mbss,
-        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
-    )
-    inventory.add_item(
-        car_battery, to=To(id=mbss.id, container="main", location=Location(x=0, y=0))
-    )
-    assert len(inventory.items) == 3
-    assert len(inventory.taken_locations) == 2
-
-    inventory.remove_item(mbss)
-    assert len(inventory.items) == 1
-    assert mbss.id not in inventory.taken_locations
-    assert len(inventory.taken_locations) == 1
-    assert inventory.root_id in inventory.taken_locations
-    assert len(inventory.taken_locations[inventory.root_id]) == 0

@@ -10,7 +10,7 @@ from modules.profile.types import Profile
 from tests.utils import tmp_dir
 from utils import generate_id, read_json_file
 
-pytestmark = [pytest.mark.usefixtures("profile")]
+pytestmark = [pytest.mark.usefixtures("create_profile")]
 
 
 async def test_read(
