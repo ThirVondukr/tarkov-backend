@@ -1,5 +1,3 @@
-from os.path import exists
-
 from fastapi import APIRouter
 
 import paths
@@ -17,7 +15,7 @@ async def get_file(path: str) -> str:
     path = path.replace("jpg", "png")  # TODO: Maybe think of a better way to do this.
     file = paths.resources.joinpath("static", path)
 
-    if not exists(file):
+    if not file.exists():
         raise FileNotFoundError("File does not exist.")
 
-    return file
+    return str(file)
