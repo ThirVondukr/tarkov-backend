@@ -10,7 +10,7 @@ import settings
 from database.base import Base, engine
 
 
-def _run_migrations(connection: Connection) -> None:
+def _run_migrations(connection: Connection) -> None:  # pragma: no cover
     alembic_cfg = Config(file_="alembic.ini")
     alembic_script = ScriptDirectory.from_config(alembic_cfg)
 
@@ -31,7 +31,9 @@ def _run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 
-async def migrate(run_migrations: bool = settings.database.run_migrations) -> None:
+async def migrate(
+    run_migrations: bool = settings.database.run_migrations
+) -> None:  # pragma: no cover
     if not run_migrations:
         return
 

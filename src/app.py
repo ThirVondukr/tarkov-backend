@@ -39,7 +39,7 @@ def create_app() -> FastAPI:
     app.include_router(router=trading.router)
 
     @app.on_event("startup")
-    async def on_startup() -> None:
+    async def on_startup() -> None:  # pragma: no cover
         await migrations.migrate()
 
     return app
