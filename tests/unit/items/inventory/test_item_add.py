@@ -275,3 +275,49 @@ def test_place_nested_out_of_bounds(
                 location=Location(x=x, y=y, rotation=rotation),
             ),
         )
+
+
+def test_add_item_to_different_slots(
+    inventory: Inventory,
+    make_item,
+):
+    pockets = make_item(name="карманы 2 на 2")
+    matches = [make_item(name="matches") for _ in range(4)]
+
+    inventory.add_item(
+        pockets,
+        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
+    )
+    for i, item in enumerate(matches, start=1):
+        inventory.add_item(
+            item,
+            to=To(id=pockets.id, container=f"pocket{i}", location=Location(x=0, y=0)),
+        )
+
+
+def test_add_item_to_non_grid_slot(
+    inventory: Inventory,
+    make_item,
+):
+    ak = make_item(name="weapon_izhmash_ak74_545x39")
+    grip = make_item(name="pistolgrip_ak_us_palm_ak_palm")
+    inventory.add_item(
+        ak,
+        to=To(
+            id=inventory.root_id,
+            container="hideout",
+            location=Location(x=0, y=0),
+        ),
+    )
+    inventory.add_item(grip, to=To(id=ak.id, container="mod_pistol_grip"))
+    assert "mod_pistol_grip" in inventory.taken_locations[ak.id]
+    with pytest.raises(SlotTakenError):
+        inventory.add_item(
+            item=make_item(name="pistolgrip_ak_us_palm_ak_palm"),
+            to=To(
+                id=ak.id,
+                container="mod_pistol_grip",
+            ),
+        )
+    inventory.remove_item(grip)
+    inventory.add_item(grip, to=To(id=ak.id, container="mod_pistol_grip"))

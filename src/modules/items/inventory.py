@@ -50,9 +50,9 @@ class Inventory:
         self.items = {item.id: item for item in items}
         self.root_id = root_id
         self.tpl_repository = template_repository
-        self.taken_locations: dict[str, dict[str, set[tuple[int, int]]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
+        self.taken_locations: dict[
+            str, dict[str, set[tuple[int, int]] | bool]
+        ] = defaultdict(dict)
 
     @classmethod
     def from_container(
@@ -120,14 +120,21 @@ class Inventory:
         item.slot_id = to.container
         item.parent_id = to.id
 
+        slots = self.taken_locations[to.id]
         if to.location is None:
-            return
-
-        self._check_out_of_bounds(item=item, to=to)
-        for point in self._item_points(item=item, location=to.location):
-            if point in self.taken_locations[to.id][to.container]:
+            if to.container in slots:
                 raise SlotTakenError
-            self.taken_locations[to.id][to.container].add(point)
+            slots[to.container] = True
+        else:
+            self._check_out_of_bounds(item=item, to=to)
+            if to.container not in slots:
+                slots[to.container] = set()
+            occupied_cells = slots[to.container]
+            assert isinstance(occupied_cells, set)
+            for point in self._item_points(item=item, location=to.location):
+                if point in occupied_cells:
+                    raise SlotTakenError
+                occupied_cells.add(point)
 
     def remove_item(self, item: Item) -> None:
         del self.items[item.id]
@@ -136,9 +143,14 @@ class Inventory:
         except KeyError:
             pass
 
-        if item.location is not None:
+        if item.location is None:
+            del self.taken_locations[item.parent_id][item.slot_id]
+        else:
+            occupied_cells = self.taken_locations[item.parent_id][item.slot_id]
+            assert isinstance(occupied_cells, set)
+
             for point in self._item_points(item=item, location=item.location):
-                self.taken_locations[item.parent_id][item.slot_id].remove(point)
+                occupied_cells.remove(point)
 
         for child in self.children(item, include_self=False):
             del self.items[child.id]
