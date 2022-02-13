@@ -68,7 +68,7 @@ async def items_moving(
             template_repository=template_repository,
         )
         profile_changes = await executor.execute(actions)
-
+    print(profile_changes.json(by_alias=True))
     return Success(
         data=ItemsMovingResponse(
             profile_changes={

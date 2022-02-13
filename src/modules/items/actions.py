@@ -23,6 +23,13 @@ class Move(BaseModel):
     to: To
 
 
+class Split(BaseModel):
+    Action: Literal["Split"] = "Split"
+    item: str
+    container: To
+    count: int
+
+
 class Remove(BaseModel):
     Action: Literal["Remove"] = "Remove"
     item: str
@@ -33,6 +40,7 @@ Action = Annotated[
         ReadEncyclopedia,
         Move,
         Remove,
+        Split,
     ],
     Field(discriminator="Action"),
 ]
