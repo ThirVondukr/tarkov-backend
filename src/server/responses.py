@@ -17,4 +17,3 @@ class ZLibORJSONResponse(ORJSONResponse):
 
     def render(self, content: dict[Any, Any]) -> bytes:
         return zlib.compress(super().render(content))
-
