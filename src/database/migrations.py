@@ -32,7 +32,7 @@ def _run_migrations(connection: Connection) -> None:  # pragma: no cover
 
 
 async def migrate(
-    run_migrations: bool = settings.database.run_migrations
+    run_migrations: bool = settings.database.run_migrations,
 ) -> None:  # pragma: no cover
     if not run_migrations:
         return
