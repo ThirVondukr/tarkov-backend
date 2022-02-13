@@ -1,5 +1,6 @@
 import functools
-from typing import Awaitable, Callable
+from builtins import type
+from typing import Any, Awaitable, Callable
 
 from modules.items.actions import (
     Action,
@@ -16,10 +17,10 @@ from modules.profile.types import Profile
 
 
 class ActionHandler:
-    actions_map: dict[type[Action], Callable[[Action], Awaitable[None]]]
+    actions_map: dict[Any, Callable[[Any], Awaitable[None]]]
 
     @functools.cached_property
-    def actions(self) -> tuple[type[Action], ...]:
+    def actions(self) -> tuple[type, ...]:
         return tuple(self.actions_map)
 
     async def execute(self, action: Action) -> None:

@@ -87,6 +87,7 @@ class Inventory:
         return self.items[item_id]
 
     def _check_out_of_bounds(self, item: Item, to: To) -> None:
+        assert to.location is not None
         if to.location.x < 0 or to.location.y < 0:
             raise OutOfBoundsError
 
@@ -155,14 +156,19 @@ class Inventory:
         except KeyError:
             pass
 
+        assert item.parent_id
+        assert item.slot_id
+
         if item.location is None:
             del self.taken_locations[item.parent_id][item.slot_id]
-        else:
+        elif isinstance(item.location, Location):
             occupied_cells = self.taken_locations[item.parent_id][item.slot_id]
             assert isinstance(occupied_cells, set)
 
             for point in self._item_points(item=item, location=item.location):
                 occupied_cells.remove(point)
+        else:
+            raise ValueError
 
         for child in self.children(item, include_self=False):
             del self.items[child.id]
@@ -170,6 +176,9 @@ class Inventory:
                 del self.taken_locations[child.id]
 
     def split(self, item: Item, to: To, count: int) -> Item:
+        if count <= 0:
+            raise ValueError
+
         if item.upd.get(STACK_COUNT, 0) <= count:
             raise ValueError
         item.upd[STACK_COUNT] -= count

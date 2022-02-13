@@ -86,7 +86,7 @@ async def nickname_reserved() -> Success[str]:
 
 @router.post(
     "/client/game/profile/nickname/validate",
-    response_model=Success[dict] | Error,
+    response_model=Success[dict],
 )
 @inject
 async def nickname_validate(
