@@ -11,6 +11,7 @@ from modules.items.actions import (
     Remove,
     Split,
     To,
+    Transfer,
 )
 from modules.items.inventory import PlayerInventory
 from modules.items.repository import TemplateRepository
@@ -55,6 +56,7 @@ class InventoryActionHandler(ActionHandler):
             Remove: self.remove,
             Split: self.split,
             Merge: self.merge,
+            Transfer: self.transfer,
         }
 
     async def move(self, action: Move) -> None:
@@ -105,6 +107,26 @@ class InventoryActionHandler(ActionHandler):
 
         target.stack_count += item.stack_count
         self.inventory.remove_item(item)
+        self.profile_changes.items.del_.append(item)
+        self.profile_changes.items.change.append(target)
+
+    async def transfer(self, action: Transfer) -> None:
+        if action.count <= 0:
+            raise ValueError
+
+        item = self.inventory.get(item_id=action.item)
+        target = self.inventory.get(item_id=action.with_)
+        if item.template_id != target.template_id:
+            raise ValueError
+        max_stack_size = self.template_repository.get(item.template_id).props[
+            "StackMaxSize"
+        ]
+        if target.stack_count + action.count > max_stack_size:
+            raise ValueError
+        target.stack_count += action.count
+        item.stack_count -= action.count
+
+        self.profile_changes.items.change.extend([item, target])
 
 
 class ActionExecutor:
