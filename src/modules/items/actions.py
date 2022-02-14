@@ -42,6 +42,13 @@ class Merge(BaseSchema):
     with_: str = Field(alias="with")
 
 
+class Transfer(BaseSchema):
+    Action: Literal["Transfer"] = "Transfer"
+    item: str
+    with_: str = Field(alias="with")
+    count: int
+
+
 Action = Annotated[
     Union[
         ReadEncyclopedia,
@@ -49,6 +56,7 @@ Action = Annotated[
         Remove,
         Split,
         Merge,
+        Transfer,
     ],
     Field(discriminator="Action"),
 ]
