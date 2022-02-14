@@ -16,7 +16,7 @@ def test_returns_200(response: httpx.Response):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_should_return_correct_time_in_weather(response: httpx.Response):
+def test_should_return_correct_time_in_weather(response: httpx.Response, freeze_time):
     weather = response.json()["data"]
 
     now = datetime.datetime.now()
