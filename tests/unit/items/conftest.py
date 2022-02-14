@@ -19,6 +19,7 @@ def make_item(template_repository: TemplateRepository):
     def _make_item(
         template_id: str | None = None,
         name: str | None = None,
+        stack_count: int = 1,
     ):
         if template_id:
             template = template_repository.get(template_id)
@@ -27,9 +28,11 @@ def make_item(template_repository: TemplateRepository):
         else:
             raise ValueError
 
-        return Item(
+        item = Item(
             id=generate_id(),
             template_id=template.id,
         )
+        item.stack_count = stack_count
+        return item
 
     return _make_item

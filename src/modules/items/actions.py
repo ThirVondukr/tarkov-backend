@@ -3,36 +3,43 @@ from typing import Annotated, Any, Literal, Union
 from pydantic import BaseModel, Field
 
 from modules.items.types import Item, Location
+from schema import BaseSchema
 from utils import camel
 
 
-class ReadEncyclopedia(BaseModel):
+class ReadEncyclopedia(BaseSchema):
     Action: Literal["ReadEncyclopedia"] = "ReadEncyclopedia"
     ids: list[str]
 
 
-class To(BaseModel):
+class To(BaseSchema):
     id: str
     container: str = Field(description="Item.slot_id")
     location: Location | None
 
 
-class Move(BaseModel):
+class Move(BaseSchema):
     Action: Literal["Move"] = "Move"
     item: str
     to: To
 
 
-class Split(BaseModel):
+class Split(BaseSchema):
     Action: Literal["Split"] = "Split"
     item: str
     container: To
     count: int
 
 
-class Remove(BaseModel):
+class Remove(BaseSchema):
     Action: Literal["Remove"] = "Remove"
     item: str
+
+
+class Merge(BaseSchema):
+    Action: Literal["Merge"] = "Merge"
+    item: str
+    with_: str = Field(alias="with")
 
 
 Action = Annotated[
@@ -41,6 +48,7 @@ Action = Annotated[
         Move,
         Remove,
         Split,
+        Merge,
     ],
     Field(discriminator="Action"),
 ]

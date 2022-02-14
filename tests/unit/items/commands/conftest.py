@@ -40,8 +40,10 @@ def profile_changes() -> ProfileChanges:
 def inventory_handler(
     player_inventory: PlayerInventory,
     profile_changes: ProfileChanges,
+    template_repository: TemplateRepository,
 ) -> InventoryActionHandler:
     return InventoryActionHandler(
         inventory=player_inventory,
         profile_changes=profile_changes,
+        template_repository=template_repository,
     )
