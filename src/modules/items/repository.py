@@ -42,7 +42,8 @@ class TemplateRepository:
 
         if len(templates_list) == 0:
             raise ValueError("No items found")
-
+        if len(templates_list) != 1:
+            raise ValueError("Multiple items found")
         return templates_list[0]
 
     def container_size(self, template_id: str, slot: str) -> tuple[int, int]:
