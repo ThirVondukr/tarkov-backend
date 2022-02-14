@@ -33,7 +33,7 @@ types-PyYAML = "^6.0.4"
 
 [tool.coverage.run]
 source = ["src"]
-command_line = "-m pytest"
+command_line = "-m pytest -v"
 concurrency = ["greenlet", "thread"]
 
 [tool.coverage.report]
