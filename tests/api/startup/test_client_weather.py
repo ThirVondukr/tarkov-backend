@@ -8,8 +8,7 @@ endpoint_url = "/client/weather"
 
 
 @pytest.fixture
-@pytest.mark.usefixtures("freeze_time")
-async def response(http_client: httpx.AsyncClient) -> httpx.Response:
+async def response(http_client: httpx.AsyncClient, freeze_time) -> httpx.Response:
     return await http_client.post(endpoint_url)
 
 
@@ -17,7 +16,7 @@ def test_returns_200(response: httpx.Response):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_should_return_correct_time_in_weather(response: httpx.Response, freeze_time):
+def test_should_return_correct_time_in_weather(response: httpx.Response):
     weather = response.json()["data"]
 
     now = datetime.datetime.now()
