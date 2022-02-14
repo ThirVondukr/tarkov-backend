@@ -28,9 +28,6 @@ class SlotTakenError(InventoryError):
     pass
 
 
-STACK_COUNT = "StackObjectsCount"
-
-
 def iter_children(parent_id: str, items: Iterable[Item]) -> Iterable[Item]:
     if not isinstance(items, list):
         items = list(items)
@@ -179,13 +176,13 @@ class Inventory:
         if count <= 0:
             raise ValueError
 
-        if item.upd.get(STACK_COUNT, 0) <= count:
+        if item.stack_count <= count:
             raise ValueError
-        item.upd[STACK_COUNT] -= count
+        item.stack_count -= count
 
         new_item = item.copy(deep=True)
         new_item.id = generate_id()
-        new_item.upd[STACK_COUNT] = count
+        new_item.stack_count = count
         self.add_item(
             new_item,
             to=to,

@@ -5,6 +5,7 @@ import pydantic
 from pydantic import BaseModel, Extra, Field
 
 import utils
+from schema import BaseSchema
 
 
 class Template(
@@ -43,7 +44,7 @@ class Location(BaseModel):
         return Rotation[value]
 
 
-class Item(BaseModel):
+class Item(BaseSchema):
     class Config:
         validate_assignment = True
         allow_population_by_field_name = True
@@ -54,3 +55,11 @@ class Item(BaseModel):
     slot_id: str | None = Field(alias="slotId")
     location: Location | int | None
     upd: dict = Field(default_factory=dict)
+
+    @property
+    def stack_count(self) -> int:
+        return self.upd.get("StackObjectsCount", 1)
+
+    @stack_count.setter
+    def stack_count(self, value: int) -> None:
+        self.upd["StackObjectsCount"] = value

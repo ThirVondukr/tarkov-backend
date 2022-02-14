@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Callable
 
 from modules.items.actions import (
     Action,
+    Merge,
     Move,
     ProfileChanges,
     ReadEncyclopedia,
@@ -44,13 +45,16 @@ class InventoryActionHandler(ActionHandler):
         self,
         inventory: PlayerInventory,
         profile_changes: ProfileChanges,
+        template_repository: TemplateRepository,
     ):
         self.inventory = inventory
         self.profile_changes = profile_changes
+        self.template_repository = template_repository
         self.actions_map = {
             Move: self.move,
             Remove: self.remove,
             Split: self.split,
+            Merge: self.merge,
         }
 
     async def move(self, action: Move) -> None:
@@ -86,6 +90,22 @@ class InventoryActionHandler(ActionHandler):
         self.profile_changes.items.change.append(item)
         self.profile_changes.items.new.append(new_item)
 
+    async def merge(self, action: Merge) -> None:
+        item = self.inventory.get(item_id=action.item)
+        target = self.inventory.get(item_id=action.with_)
+
+        if item.template_id != target.template_id:
+            raise ValueError
+
+        max_stack_size = self.template_repository.get(item.template_id).props[
+            "StackMaxSize"
+        ]
+        if item.stack_count + target.stack_count > max_stack_size:
+            raise ValueError
+
+        target.stack_count += item.stack_count
+        self.inventory.remove_item(item)
+
 
 class ActionExecutor:
     def __init__(
@@ -94,6 +114,7 @@ class ActionExecutor:
         template_repository: TemplateRepository,
     ):
         self.profile = profile
+        self.template_repository = template_repository
         self.inventory = PlayerInventory.from_profile_inventory(
             profile_inventory=profile.inventory,
             template_repository=template_repository,
@@ -108,6 +129,7 @@ class ActionExecutor:
             InventoryActionHandler(
                 inventory=self.inventory,
                 profile_changes=profile_changes,
+                template_repository=self.template_repository,
             ),
         ]
 
