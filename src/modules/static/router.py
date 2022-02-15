@@ -1,16 +1,15 @@
 from fastapi import APIRouter
+from fastapi.responses import FileResponse
 
 import paths
-from server import FileResponse, ZLibRoute
 
 router = APIRouter(
     tags=["Static"],
-    route_class=ZLibRoute,
     default_response_class=FileResponse,
 )
 
 
-@router.get("/files/{path:path}", response_class=FileResponse)
+@router.get("/files/{path:path}")
 async def get_file(path: str) -> str:
     path = path.replace("jpg", "png")  # TODO: Maybe think of a better way to do this.
     file = paths.resources.joinpath("static", path)
