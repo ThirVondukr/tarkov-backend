@@ -11,10 +11,11 @@ from modules.items.actions import (
     Remove,
     Split,
     To,
-    Transfer,
+    Transfer, ApplyInventoryChanges,
 )
 from modules.items.inventory import PlayerInventory
 from modules.items.repository import TemplateRepository
+from modules.items.types import Item
 from modules.profile.types import Profile
 
 
@@ -57,6 +58,7 @@ class InventoryActionHandler(ActionHandler):
             Split: self.split,
             Merge: self.merge,
             Transfer: self.transfer,
+            ApplyInventoryChanges: self.apply_inventory_changes,
         }
 
     async def move(self, action: Move) -> None:
@@ -89,7 +91,6 @@ class InventoryActionHandler(ActionHandler):
             to=action.container,
             count=action.count,
         )
-        self.profile_changes.items.change.append(item)
         self.profile_changes.items.new.append(new_item)
 
     async def merge(self, action: Merge) -> None:
@@ -127,6 +128,25 @@ class InventoryActionHandler(ActionHandler):
         item.stack_count -= action.count
 
         self.profile_changes.items.change.extend([item, target])
+
+    async def apply_inventory_changes(self, action: ApplyInventoryChanges) -> None:
+        items: list[Item] = []
+
+        for changed_item in action.changed_items:
+            item = self.inventory.get(changed_item.id)
+            items.append(item)
+            items.extend(self.inventory.children(item, include_self=False))
+            self.inventory.remove_item(item)
+
+            item.parent_id = changed_item.parent_id
+            item.slot_id = changed_item.slot_id
+            item.location = changed_item.location
+
+        for item in items:
+            self.inventory.add_item(
+                item,
+                to=To.from_item(item)
+            )
 
 
 class ActionExecutor:

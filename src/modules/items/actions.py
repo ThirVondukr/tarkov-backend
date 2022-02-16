@@ -17,6 +17,14 @@ class To(BaseSchema):
     container: str = Field(description="Item.slot_id")
     location: Location | None
 
+    @classmethod
+    def from_item(cls, item: Item) -> "To":
+        return cls(
+            id=item.parent_id,
+            container=item.slot_id,
+            location=item.location,
+        )
+
 
 class Move(BaseSchema):
     Action: Literal["Move"] = "Move"
@@ -49,6 +57,11 @@ class Transfer(BaseSchema):
     count: int
 
 
+class ApplyInventoryChanges(BaseSchema, alias_generator=camel):
+    Action: Literal["ApplyInventoryChanges"] = "ApplyInventoryChanges"
+    changed_items: list[Item]
+
+
 Action = Annotated[
     Union[
         ReadEncyclopedia,
@@ -57,6 +70,7 @@ Action = Annotated[
         Split,
         Merge,
         Transfer,
+        ApplyInventoryChanges,
     ],
     Field(discriminator="Action"),
 ]
