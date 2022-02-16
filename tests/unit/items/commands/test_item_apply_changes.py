@@ -11,17 +11,15 @@ async def test_apply_inventory_changes(
     player_inventory: PlayerInventory,
     make_item,
 ):
-    items = [
-        make_item(name="matches") for _ in range(3)
-    ]
+    items = [make_item(name="matches") for _ in range(3)]
     for i, item in enumerate(items):
         player_inventory.add_item(
             item,
             to=To(
                 id=player_inventory.root_id,
                 container="hideout",
-                location=Location(x=i, y=0)
-            )
+                location=Location(x=i, y=0),
+            ),
         )
 
     changed_items = copy.deepcopy(items)

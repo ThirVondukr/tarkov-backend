@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Callable
 
 from modules.items.actions import (
     Action,
+    ApplyInventoryChanges,
     Merge,
     Move,
     ProfileChanges,
@@ -11,7 +12,7 @@ from modules.items.actions import (
     Remove,
     Split,
     To,
-    Transfer, ApplyInventoryChanges,
+    Transfer,
 )
 from modules.items.inventory import PlayerInventory
 from modules.items.repository import TemplateRepository
@@ -143,10 +144,7 @@ class InventoryActionHandler(ActionHandler):
             item.location = changed_item.location
 
         for item in items:
-            self.inventory.add_item(
-                item,
-                to=To.from_item(item)
-            )
+            self.inventory.add_item(item, to=To.from_item(item))
 
 
 class ActionExecutor:
