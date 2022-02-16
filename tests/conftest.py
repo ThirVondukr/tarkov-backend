@@ -173,7 +173,7 @@ async def profile(
         yield profile
 
 
-@pytest.fixture(params=["ru", "en"])
+@pytest.fixture(params=["ru", "en", "fr", "ge"])
 def language(request) -> str:
     return request.param
 
