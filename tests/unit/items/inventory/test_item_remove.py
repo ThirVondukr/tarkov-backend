@@ -63,14 +63,14 @@ def test_remove_nested(
         car_battery, to=To(id=mbss_2.id, container="main", location=Location(x=0, y=0))
     )
     assert len(inventory.items) == 4
-    assert len(inventory.taken_locations) == 3
+    assert len(inventory.map.locations) == 3
 
     inventory.remove_item(mbss_1)
     assert len(inventory.items) == 1
-    assert mbss_1.id not in inventory.taken_locations
-    assert len(inventory.taken_locations) == 1
-    assert inventory.root_id in inventory.taken_locations
-    assert len(inventory.taken_locations[inventory.root_id]["hideout"]) == 0
+    assert mbss_1.id not in inventory.map.locations
+    assert len(inventory.map.locations) == 1
+    assert inventory.root_id in inventory.map.locations
+    assert len(inventory.map.locations[inventory.root_id]["hideout"]) == 0
 
 
 def test_remove_item_from_non_grid_slot(
@@ -89,9 +89,8 @@ def test_remove_item_from_non_grid_slot(
     )
     inventory.add_item(grip, to=To(id=ak.id, container="mod_pistol_grip"))
     inventory.remove_item(grip)
-    assert inventory.taken_locations == {
+    assert inventory.map.locations == {
         inventory.root_id: {"hideout": {(1, 0), (2, 0), (3, 0), (0, 0)}},
-        ak.id: {},
     }
 
 
@@ -115,4 +114,4 @@ def test_remove_ammo(
     )
     inventory.remove_item(ammo)
     assert ammo.id not in inventory.items
-    assert inventory.taken_locations[magazine.id]["cartridges"] == set()
+    assert inventory.map.cartridges[magazine.id] == set()

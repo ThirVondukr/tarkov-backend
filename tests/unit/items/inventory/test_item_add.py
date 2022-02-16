@@ -310,7 +310,7 @@ def test_add_item_to_non_grid_slot(
         ),
     )
     inventory.add_item(grip, to=To(id=ak.id, container="mod_pistol_grip"))
-    assert "mod_pistol_grip" in inventory.taken_locations[ak.id]
+    assert "mod_pistol_grip" in inventory.map.slots[ak.id]
     with pytest.raises(SlotTakenError):
         inventory.add_item(
             item=make_item(name="pistolgrip_ak_us_palm_ak_palm"),
@@ -341,4 +341,6 @@ def test_add_ammo_into_magazine(
             location=0,
         ),
     )
-    assert 0 in inventory.taken_locations[magazine.id]["cartridges"]
+    assert inventory.map.cartridges[magazine.id] == {
+        0,
+    }

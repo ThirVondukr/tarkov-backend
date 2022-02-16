@@ -1,6 +1,6 @@
 import enum
 from collections import defaultdict
-from typing import Iterable
+from typing import Any, Iterable, NamedTuple, cast
 
 from modules.items.actions import To
 from modules.items.repository import TemplateRepository
@@ -40,14 +40,109 @@ def iter_children(parent_id: str, items: Iterable[Item]) -> Iterable[Item]:
         stack.extend(item for item in items if item.parent_id == child.id)
 
 
+class Point(NamedTuple):
+    x: int
+    y: int
+
+
 def item_size(
     parent: Item,
     # children: list[Item],
     template_repository: TemplateRepository,
-) -> tuple[int, int]:
+) -> Point:
     template = template_repository.get(parent.template_id)
     width, height = template.props["Width"], template.props["Height"]
-    return width, height
+    return Point(x=width, y=height)
+
+
+class InventoryMap:
+    def __init__(
+        self,
+        inventory: "Inventory",
+        template_repository: TemplateRepository,
+    ):
+        self._inventory = inventory
+        self._template_repository = template_repository
+
+        self.locations: dict[str, dict[str, set[Point]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
+        self.slots: dict[str, set[str]] = defaultdict(set)
+        self.cartridges: dict[str, set[int]] = defaultdict(set)
+
+    def add_item(self, item: Item, to: To) -> None:
+        if isinstance(to.location, Location):
+            self._check_out_of_bounds(item=item, to=to)
+            occupied_locations = self.locations[to.id][to.container]
+            for point in self._item_points(item=item, location=to.location):
+                if point in occupied_locations:
+                    raise SlotTakenError
+                occupied_locations.add(point)
+        elif isinstance(to.location, int):
+            if to.location in self.cartridges[to.id]:
+                raise SlotTakenError
+            self.cartridges[to.id].add(to.location)
+        else:
+            if to.container in self.slots[to.id]:
+                raise SlotTakenError
+            self.slots[to.id].add(to.container)
+
+    def remove_item(
+        self,
+        item: Item,
+        children: list[Item] | None = None,
+    ) -> None:
+        children = children or []
+        assert item.parent_id
+        assert item.slot_id
+
+        # Use reverse to remove most nested items first
+        for child in reversed(children):
+            self.remove_item(child)
+
+        for map_ in [self.locations, self.slots, self.cartridges]:
+            map_ = cast(dict[str, Any], map_)
+            try:
+                del map_[item.id]
+            except KeyError:
+                pass
+
+        if isinstance(item.location, Location):
+            occupied_locations = self.locations[item.parent_id][item.slot_id]
+            for point in self._item_points(item=item, location=item.location):
+                occupied_locations.remove(point)
+        elif isinstance(item.location, int):
+            self.cartridges[item.parent_id].remove(item.location)
+        else:
+            self.slots[item.parent_id].remove(item.slot_id)
+
+    def item_size(self, item: Item, location: Location | None = None) -> Point:
+        size = item_size(item, self._template_repository)
+        if location is not None and location.rotation is Rotation.Vertical:
+            size = Point(x=size.y, y=size.x)
+        return size
+
+    def _check_out_of_bounds(self, item: Item, to: To) -> None:
+        assert isinstance(to.location, Location)
+        if to.location.x < 0 or to.location.y < 0:
+            raise OutOfBoundsError
+
+        container_width, container_height = self._template_repository.container_size(
+            self._inventory.get(to.id).template_id, slot=to.container
+        )
+
+        item_x, item_y = self.item_size(item, location=to.location)
+        if to.location.x + item_x > container_width:
+            raise OutOfBoundsError
+
+        if to.location.y + item_y > container_height:
+            raise OutOfBoundsError
+
+    def _item_points(self, item: Item, location: Location) -> Iterable[Point]:
+        size = self.item_size(item, location)
+        for x in range(location.x, location.x + size.x):
+            for y in range(location.y, location.y + size.y):
+                yield Point(x=x, y=y)
 
 
 class Inventory:
@@ -60,9 +155,7 @@ class Inventory:
         self.items = {item.id: item for item in items}
         self.root_id = root_id
         self.tpl_repository = template_repository
-        self.taken_locations: dict[
-            str, dict[str, set[tuple[int, int] | int] | bool]
-        ] = defaultdict(dict)
+        self.map = InventoryMap(self, template_repository)
 
     @classmethod
     def from_container(
@@ -83,28 +176,6 @@ class Inventory:
     def get(self, item_id: str) -> Item:
         return self.items[item_id]
 
-    def _check_out_of_bounds(self, item: Item, to: To) -> None:
-        assert isinstance(to.location, Location)
-        if to.location.x < 0 or to.location.y < 0:
-            raise OutOfBoundsError
-
-        container_width, container_height = self.tpl_repository.container_size(
-            self.get(to.id).template_id, slot=to.container
-        )
-
-        item_x, item_y = self.item_size(item, location=to.location)
-        if to.location.x + item_x > container_width:
-            raise OutOfBoundsError
-
-        if to.location.y + item_y > container_height:
-            raise OutOfBoundsError
-
-    def _item_points(self, item: Item, location: Location) -> Iterable[tuple[int, int]]:
-        width, height = self.item_size(item, location)
-        for x in range(location.x, location.x + width):
-            for y in range(location.y, location.y + height):
-                yield x, y
-
     def children(self, parent: Item, include_self: bool) -> Iterable[Item]:
         children = iter_children(parent.id, self.items.values())
 
@@ -112,14 +183,6 @@ class Inventory:
             yield parent
 
         yield from children
-
-    def item_size(
-        self, item: Item, location: Location | None = None
-    ) -> tuple[int, int]:
-        width, height = item_size(item, self.tpl_repository)
-        if location is not None and location.rotation is Rotation.Vertical:
-            width, height = height, width
-        return width, height
 
     def add_item(self, item: Item, to: To) -> None:
         if item.id in self.items:
@@ -130,54 +193,15 @@ class Inventory:
         item.slot_id = to.container
         item.parent_id = to.id
 
-        slots = self.taken_locations[to.id]
-        if isinstance(to.location, Location):
-            self._check_out_of_bounds(item=item, to=to)
-            if to.container not in slots:
-                slots[to.container] = set()
-            occupied_cells = slots[to.container]
-            assert isinstance(occupied_cells, set)
-            for point in self._item_points(item=item, location=to.location):
-                if point in occupied_cells:
-                    raise SlotTakenError
-                occupied_cells.add(point)
-        elif isinstance(to.location, int):
-            if "cartridges" not in slots:
-                slots["cartridges"] = set()
-            assert isinstance(slots["cartridges"], set)
-            slots["cartridges"].add(to.location)
-        else:
-            if to.container in slots:
-                raise SlotTakenError
-            slots[to.container] = True
+        self.map.add_item(item, to)
 
     def remove_item(self, item: Item) -> None:
+        children = list(self.children(item, include_self=False))
+        self.map.remove_item(item, children)
+
         del self.items[item.id]
-        try:
-            del self.taken_locations[item.id]
-        except KeyError:
-            pass
-
-        assert item.parent_id
-        assert item.slot_id
-
-        if isinstance(item.location, Location):
-            occupied_cells = self.taken_locations[item.parent_id][item.slot_id]
-            assert isinstance(occupied_cells, set)
-
-            for point in self._item_points(item=item, location=item.location):
-                occupied_cells.remove(point)
-        elif isinstance(item.location, int):
-            cartridges = self.taken_locations[item.parent_id]["cartridges"]
-            assert isinstance(cartridges, set)
-            cartridges.remove(item.location)
-        else:
-            del self.taken_locations[item.parent_id][item.slot_id]
-
         for child in self.children(item, include_self=False):
             del self.items[child.id]
-            if child.id in self.taken_locations:
-                del self.taken_locations[child.id]
 
     def split(self, item: Item, to: To, count: int) -> Item:
         if count <= 0:
