@@ -61,7 +61,7 @@ class Inventory:
         self.root_id = root_id
         self.tpl_repository = template_repository
         self.taken_locations: dict[
-            str, dict[str, set[tuple[int, int]] | bool]
+            str, dict[str, set[tuple[int, int] | int] | bool]
         ] = defaultdict(dict)
 
     @classmethod
@@ -84,7 +84,7 @@ class Inventory:
         return self.items[item_id]
 
     def _check_out_of_bounds(self, item: Item, to: To) -> None:
-        assert to.location is not None
+        assert isinstance(to.location, Location)
         if to.location.x < 0 or to.location.y < 0:
             raise OutOfBoundsError
 
@@ -131,11 +131,7 @@ class Inventory:
         item.parent_id = to.id
 
         slots = self.taken_locations[to.id]
-        if to.location is None:
-            if to.container in slots:
-                raise SlotTakenError
-            slots[to.container] = True
-        else:
+        if isinstance(to.location, Location):
             self._check_out_of_bounds(item=item, to=to)
             if to.container not in slots:
                 slots[to.container] = set()
@@ -145,6 +141,15 @@ class Inventory:
                 if point in occupied_cells:
                     raise SlotTakenError
                 occupied_cells.add(point)
+        elif isinstance(to.location, int):
+            if "cartridges" not in slots:
+                slots["cartridges"] = set()
+            assert isinstance(slots["cartridges"], set)
+            slots["cartridges"].add(to.location)
+        else:
+            if to.container in slots:
+                raise SlotTakenError
+            slots[to.container] = True
 
     def remove_item(self, item: Item) -> None:
         del self.items[item.id]
@@ -156,16 +161,18 @@ class Inventory:
         assert item.parent_id
         assert item.slot_id
 
-        if item.location is None:
-            del self.taken_locations[item.parent_id][item.slot_id]
-        elif isinstance(item.location, Location):
+        if isinstance(item.location, Location):
             occupied_cells = self.taken_locations[item.parent_id][item.slot_id]
             assert isinstance(occupied_cells, set)
 
             for point in self._item_points(item=item, location=item.location):
                 occupied_cells.remove(point)
+        elif isinstance(item.location, int):
+            cartridges = self.taken_locations[item.parent_id]["cartridges"]
+            assert isinstance(cartridges, set)
+            cartridges.remove(item.location)
         else:
-            raise ValueError
+            del self.taken_locations[item.parent_id][item.slot_id]
 
         for child in self.children(item, include_self=False):
             del self.items[child.id]

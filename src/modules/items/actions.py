@@ -15,7 +15,7 @@ class ReadEncyclopedia(BaseSchema):
 class To(BaseSchema):
     id: str
     container: str = Field(description="Item.slot_id")
-    location: Location | None
+    location: Location | int | None
 
     @classmethod
     def from_item(cls, item: Item) -> "To":

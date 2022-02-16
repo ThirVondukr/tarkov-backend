@@ -321,3 +321,24 @@ def test_add_item_to_non_grid_slot(
         )
     inventory.remove_item(grip)
     inventory.add_item(grip, to=To(id=ak.id, container="mod_pistol_grip"))
+
+
+def test_add_ammo_into_magazine(
+    inventory: Inventory,
+    make_item,
+):
+    magazine = make_item(name="mag_ak74_izhmash_6L20_545x39_30")
+    ammo = make_item(name="patron_545x39_PS")
+    inventory.add_item(
+        item=magazine,
+        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
+    )
+    inventory.add_item(
+        ammo,
+        to=To(
+            id=magazine.id,
+            container="cartridges",
+            location=0,
+        ),
+    )
+    assert 0 in inventory.taken_locations[magazine.id]["cartridges"]

@@ -93,3 +93,26 @@ def test_remove_item_from_non_grid_slot(
         inventory.root_id: {"hideout": {(1, 0), (2, 0), (3, 0), (0, 0)}},
         ak.id: {},
     }
+
+
+def test_remove_ammo(
+    inventory: Inventory,
+    make_item,
+):
+    magazine = make_item(name="mag_ak74_izhmash_6L20_545x39_30")
+    ammo = make_item(name="patron_545x39_PS")
+    inventory.add_item(
+        item=magazine,
+        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
+    )
+    inventory.add_item(
+        ammo,
+        to=To(
+            id=magazine.id,
+            container="cartridges",
+            location=0,
+        ),
+    )
+    inventory.remove_item(ammo)
+    assert ammo.id not in inventory.items
+    assert inventory.taken_locations[magazine.id]["cartridges"] == set()
