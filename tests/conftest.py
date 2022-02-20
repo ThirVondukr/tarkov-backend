@@ -4,7 +4,6 @@ import pathlib
 import shutil
 import time
 import uuid
-from unittest import mock
 
 import httpx
 import orjson
@@ -194,9 +193,12 @@ def templates_as_dict(templates) -> dict[str, dict]:
 
 @pytest.fixture
 def freeze_time() -> float:
-    timestamp = time.time()
-    with mock.patch.object(time, "time", return_value=timestamp):
-        yield timestamp
+    original_time_function = time.time
+    timestamp = original_time_function()
+
+    time.time = lambda: timestamp
+    yield timestamp
+    time.time = original_time_function
 
 
 @pytest.fixture(scope="session")

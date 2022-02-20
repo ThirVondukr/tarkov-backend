@@ -58,10 +58,8 @@ def item_size(
 class InventoryMap:
     def __init__(
         self,
-        inventory: "Inventory",
         template_repository: TemplateRepository,
     ):
-        self._inventory = inventory
         self._template_repository = template_repository
 
         self.locations: dict[str, dict[str, set[Point]]] = defaultdict(
@@ -70,9 +68,13 @@ class InventoryMap:
         self.slots: dict[str, set[str]] = defaultdict(set)
         self.cartridges: dict[str, set[int]] = defaultdict(set)
 
-    def add_item(self, item: Item, to: To) -> None:
+    def add_item(self, item: Item, to: To, to_item: Item) -> None:
         if isinstance(to.location, Location):
-            self._check_out_of_bounds(item=item, to=to)
+            self.check_out_of_bounds(
+                item=item,
+                to=to,
+                to_item=to_item,
+            )
             occupied_locations = self.locations[to.id][to.container]
             for point in self._item_points(item=item, location=to.location):
                 if point in occupied_locations:
@@ -122,14 +124,21 @@ class InventoryMap:
             size = Point(x=size.y, y=size.x)
         return size
 
-    def _check_out_of_bounds(self, item: Item, to: To) -> None:
+    def check_out_of_bounds(
+        self,
+        item: Item,
+        to: To,
+        to_item: Item,
+    ) -> None:
         assert isinstance(to.location, Location)
         if to.location.x < 0 or to.location.y < 0:
             raise OutOfBoundsError
 
         container_width, container_height = self._template_repository.container_size(
-            self._inventory.get(to.id).template_id, slot=to.container
+            to_item.template_id, slot=to.container
         )
+        if container_width + container_height == 0:
+            return
 
         item_x, item_y = self.item_size(item, location=to.location)
         if to.location.x + item_x > container_width:
@@ -155,7 +164,7 @@ class Inventory:
         self.items = {item.id: item for item in items}
         self.root_id = root_id
         self.tpl_repository = template_repository
-        self.map = InventoryMap(self, template_repository)
+        self.map = InventoryMap(template_repository)
 
     @classmethod
     def from_container(
@@ -193,7 +202,11 @@ class Inventory:
         item.slot_id = to.container
         item.parent_id = to.id
 
-        self.map.add_item(item, to)
+        self.map.add_item(
+            item=item,
+            to=to,
+            to_item=self.get(to.id),
+        )
 
     def remove_item(self, item: Item) -> None:
         children = list(self.children(item, include_self=False))

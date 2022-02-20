@@ -344,3 +344,34 @@ def test_add_ammo_into_magazine(
     assert inventory.map.cartridges[magazine.id] == {
         0,
     }
+
+
+def test_cant_add_ammo_to_same_slot(
+    inventory: Inventory,
+    make_item,
+):
+    magazine = make_item(name="mag_ak74_izhmash_6L20_545x39_30")
+    ammo1 = make_item(name="patron_545x39_PS")
+    ammo2 = make_item(name="patron_545x39_PS")
+    inventory.add_item(
+        item=magazine,
+        to=To(id=inventory.root_id, container="hideout", location=Location(x=0, y=0)),
+    )
+    inventory.add_item(
+        ammo1,
+        to=To(
+            id=magazine.id,
+            container="cartridges",
+            location=0,
+        ),
+    )
+
+    with pytest.raises(SlotTakenError):
+        inventory.add_item(
+            ammo2,
+            to=To(
+                id=magazine.id,
+                container="cartridges",
+                location=0,
+            ),
+        )
