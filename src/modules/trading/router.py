@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import APIRouter
 
 import paths
+from modules.trading.types import TraderAssort
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
 from utils import read_json_file
@@ -31,3 +32,13 @@ async def trader_settings() -> Success[list[dict[str, Any]]]:
 )
 async def customization_storage() -> Success[dict]:
     return Success(data={})
+
+
+@router.post(
+    "/client/trading/api/getTraderAssort/{trader_id}",
+    response_model=TraderAssort,
+)
+async def get_trader_assort(
+    trader_id: str,
+) -> TraderAssort:
+    return TraderAssort()
