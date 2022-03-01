@@ -8,12 +8,11 @@ from fastapi import APIRouter, Depends, Request
 from starlette.background import BackgroundTasks
 
 import paths
-from modules.items.actions import ItemsMovingResponse
-from modules.items.commands import Action, ActionExecutor
+from modules.items.actions import AnyAction, ItemsMovingResponse
+from modules.items.handlers import ActionHandler
 from modules.items.repository import TemplateRepository
 from modules.items.types import Template
 from modules.profile.dependencies import get_profile_id
-from modules.profile.services import ProfileManager
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
 from utils import read_json_file
@@ -50,28 +49,23 @@ async def handbook_templates() -> Success[dict[str, list]]:
 @inject
 async def items_moving(
     request: Request,
-    template_repository: Annotated[TemplateRepository, Inject],
-    profile_manager: Annotated[ProfileManager, Inject],
+    executor: Annotated[ActionHandler, Inject],
     background_tasks: BackgroundTasks,
     profile_id: str = Depends(get_profile_id),
 ) -> Success[ItemsMovingResponse]:
     data = await request.json()
     print(orjson.dumps(data))
-    actions = pydantic.parse_obj_as(list[Action], data["data"])
+    actions = pydantic.parse_obj_as(list[AnyAction], data["data"])
 
-    async with profile_manager.profile(
-        profile_id,
+    profile_changes = await executor.execute(
+        actions=actions,
+        profile_id=profile_id,
         background_tasks=background_tasks,
-    ) as profile:
-        executor = ActionExecutor(
-            profile=profile,
-            template_repository=template_repository,
+    )
+    return Success(
+        data=ItemsMovingResponse(
+            profile_changes={
+                profile_id: profile_changes,
+            }
         )
-        profile_changes = await executor.execute(actions)
-        return Success(
-            data=ItemsMovingResponse(
-                profile_changes={
-                    profile.id: profile_changes,
-                }
-            )
-        )
+    )

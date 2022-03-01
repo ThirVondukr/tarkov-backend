@@ -1,7 +1,7 @@
 import pytest
 
 from modules.items.actions import ProfileChanges
-from modules.items.commands import InventoryActionHandler
+from modules.items.handlers import Context
 from modules.items.inventory import PlayerInventory
 from modules.items.repository import TemplateRepository
 from modules.profile.types import Profile
@@ -32,18 +32,13 @@ def player_inventory(
 
 
 @pytest.fixture
-def profile_changes() -> ProfileChanges:
-    return ProfileChanges(skills={})
-
-
-@pytest.fixture
-def inventory_handler(
-    player_inventory: PlayerInventory,
-    profile_changes: ProfileChanges,
-    template_repository: TemplateRepository,
-) -> InventoryActionHandler:
-    return InventoryActionHandler(
+def context(
+    profile: Profile, player_inventory, template_repository: TemplateRepository
+) -> Context:
+    return Context(
+        profile=profile,
         inventory=player_inventory,
-        profile_changes=profile_changes,
+        from_inventory=player_inventory,
+        profile_changes=ProfileChanges(skills={}),
         template_repository=template_repository,
     )

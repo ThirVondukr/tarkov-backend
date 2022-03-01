@@ -1,7 +1,8 @@
 import pytest
 
-from modules.items.actions import ProfileChanges, To, Transfer
-from modules.items.commands import InventoryActionHandler
+from modules.items import handlers
+from modules.items.actions import To, Transfer
+from modules.items.handlers import Context
 from modules.items.inventory import PlayerInventory
 from modules.items.types import Location
 
@@ -31,39 +32,40 @@ def player_inventory(player_inventory: PlayerInventory, item_1, item_2):
 
 
 async def test_transfer(
-    inventory_handler: InventoryActionHandler,
-    profile_changes: ProfileChanges,
+    context: Context,
     item_1,
     item_2,
 ):
-    await inventory_handler.transfer(
+    await handlers.transfer(
         Transfer(
             item=item_1.id,
             with_=item_2.id,
             count=10,
-        )
+        ),
+        context,
     )
     assert item_1.stack_count == 30
     assert item_2.stack_count == 50
 
-    assert item_1 in profile_changes.items.change
-    assert item_2 in profile_changes.items.change
+    assert item_1 in context.profile_changes.items.change
+    assert item_2 in context.profile_changes.items.change
 
 
 async def test_transfer_exceeding_max_stack(
-    inventory_handler: InventoryActionHandler,
+    context: Context,
     item_1,
     item_2,
 ):
     with pytest.raises(ValueError):
-        await inventory_handler.transfer(
-            Transfer(item=item_1.id, with_=item_2.id, count=11)
+        await handlers.transfer(
+            Transfer(item=item_1.id, with_=item_2.id, count=11),
+            context,
         )
 
 
 async def test_transfer_different_items(
+    context: Context,
     player_inventory: PlayerInventory,
-    inventory_handler: InventoryActionHandler,
     item_1,
     make_item,
 ):
@@ -77,8 +79,9 @@ async def test_transfer_different_items(
         ),
     )
     with pytest.raises(ValueError):
-        await inventory_handler.transfer(
-            Transfer(item=item_1.id, with_=item_2.id, count=1)
+        await handlers.transfer(
+            Transfer(item=item_1.id, with_=item_2.id, count=1),
+            context,
         )
 
 
@@ -87,12 +90,13 @@ async def test_transfer_different_items(
     (-1, 0),
 )
 async def test_transfer_negative_amount(
-    inventory_handler: InventoryActionHandler,
+    context: Context,
     item_1,
     item_2,
     count: int,
 ):
     with pytest.raises(ValueError):
-        await inventory_handler.transfer(
-            Transfer(item=item_1.id, with_=item_2.id, count=count)
+        await handlers.transfer(
+            Transfer(item=item_1.id, with_=item_2.id, count=count),
+            context,
         )

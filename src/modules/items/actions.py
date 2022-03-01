@@ -1,15 +1,10 @@
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
 from modules.items.types import Item, Location
 from schema import BaseSchema
 from utils import camel
-
-
-class ReadEncyclopedia(BaseSchema):
-    Action: Literal["ReadEncyclopedia"] = "ReadEncyclopedia"
-    ids: list[str]
 
 
 class To(BaseSchema):
@@ -26,43 +21,63 @@ class To(BaseSchema):
         )
 
 
-class Move(BaseSchema):
+class Owner(BaseSchema):
+    id: str
+    type: Literal["Trader"]
+
+
+class Action(BaseSchema):
+    Action: str
+    from_owner: Optional[Owner] = None
+
+
+class ReadEncyclopedia(Action):
+    Action: Literal["ReadEncyclopedia"] = "ReadEncyclopedia"
+    ids: list[str]
+
+
+class Move(Action):
     Action: Literal["Move"] = "Move"
     item: str
     to: To
 
 
-class Split(BaseSchema):
+class Split(Action):
     Action: Literal["Split"] = "Split"
     item: str
     container: To
     count: int
 
 
-class Remove(BaseSchema):
+class Remove(Action):
     Action: Literal["Remove"] = "Remove"
     item: str
 
 
-class Merge(BaseSchema):
+class Merge(Action):
     Action: Literal["Merge"] = "Merge"
     item: str
     with_: str = Field(alias="with")
 
 
-class Transfer(BaseSchema):
+class Transfer(Action):
     Action: Literal["Transfer"] = "Transfer"
     item: str
     with_: str = Field(alias="with")
     count: int
 
 
-class ApplyInventoryChanges(BaseSchema, alias_generator=camel):
+class ApplyInventoryChanges(Action, alias_generator=camel):
     Action: Literal["ApplyInventoryChanges"] = "ApplyInventoryChanges"
     changed_items: list[Item]
 
 
-Action = Annotated[
+class Examine(Action, alias_generator=camel):
+    Action: Literal["Examine"] = "Examine"
+    item: str
+
+
+AnyAction = Annotated[
     Union[
         ReadEncyclopedia,
         Move,
@@ -71,6 +86,7 @@ Action = Annotated[
         Merge,
         Transfer,
         ApplyInventoryChanges,
+        Examine,
     ],
     Field(discriminator="Action"),
 ]
