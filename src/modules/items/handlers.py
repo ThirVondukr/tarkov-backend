@@ -26,7 +26,7 @@ from modules.items.repository import TemplateRepository
 from modules.items.types import Item
 from modules.profile.services import ProfileManager
 from modules.profile.types import Profile
-from modules.trading.services import TraderManager
+from modules.trading.manager import TraderManager
 
 
 async def read_encyclopedia(action: ReadEncyclopedia, ctx: Context) -> None:

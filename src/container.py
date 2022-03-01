@@ -8,7 +8,7 @@ from modules.languages.services import LanguageService
 from modules.launcher.services import EditionsService
 from modules.profile.commands import ProfileCreateCommand
 from modules.profile.services import ProfileManager, ProfileService
-from modules.trading.services import create_trader_manager
+from modules.trading.manager import create_trader_manager
 
 
 def create_container() -> Container:
