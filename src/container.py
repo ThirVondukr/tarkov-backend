@@ -1,3 +1,5 @@
+import functools
+
 from aioinject import Callable, Container, Singleton
 
 from database.dependencies import get_session
@@ -11,6 +13,7 @@ from modules.profile.services import ProfileManager, ProfileService
 from modules.trading.manager import create_trader_manager
 
 
+@functools.lru_cache(maxsize=1)
 def create_container() -> Container:
     container = Container()
     container.register(Singleton(create_template_repository))

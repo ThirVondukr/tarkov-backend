@@ -8,6 +8,7 @@ import uuid
 import httpx
 import orjson
 import pytest
+from aioinject import Container, Object
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from starlette import status
@@ -15,11 +16,13 @@ from starlette import status
 import paths
 import settings
 from app import create_app
+from container import create_container
 from database.base import Base, Session
 from database.models import Account
 from modules.items.repository import TemplateRepository, create_template_repository
 from modules.profile.services import ProfileManager
 from modules.profile.types import Profile
+from modules.trading.manager import create_trader_manager
 from tests.utils import deflate_hook
 
 
@@ -204,3 +207,18 @@ def freeze_time() -> float:
 @pytest.fixture(scope="session")
 async def template_repository() -> TemplateRepository:
     return await create_template_repository()
+
+
+@pytest.fixture
+def container() -> Container:
+    yield create_container()
+
+
+@pytest.fixture
+async def trader_manager(template_repository: TemplateRepository, container: Container):
+    manager = await create_trader_manager(
+        template_repository=template_repository,
+    )
+
+    with container.override(Object(manager)):
+        yield manager

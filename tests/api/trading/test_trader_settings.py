@@ -1,11 +1,10 @@
 import operator
 
 import httpx
-import orjson
 import pytest
 from starlette import status
 
-import paths
+from modules.trading.manager import TraderManager
 
 
 @pytest.fixture
@@ -17,11 +16,11 @@ def test_returns_200(response: httpx.Response):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_returns_list_of_trader_bases(response: httpx.Response):
-    expected = []
-    for base in paths.traders.rglob("base.json"):
-        with base.open(encoding="utf8") as file:
-            expected.append(orjson.loads(file.read()))
+def test_returns_list_of_trader_bases(
+    trader_manager: TraderManager,
+    response: httpx.Response,
+):
+    expected = [trader.base for trader in trader_manager.traders.values()]
 
     expected.sort(key=operator.itemgetter("_id"))
     assert response.json()["data"] == expected

@@ -6,12 +6,10 @@ from aioinject import Inject
 from aioinject.ext.fastapi import inject
 from fastapi import APIRouter
 
-import paths
 from modules.trading.manager import TraderManager
 from modules.trading.types import TraderAssort
 from schema import Success
 from server import ZLibORJSONResponse, ZLibRoute
-from utils import read_json_file
 
 router = APIRouter(
     tags=["Trading"],
@@ -24,8 +22,11 @@ router = APIRouter(
     "/client/trading/api/traderSettings",
     response_model=Success[list[dict[str, Any]]],
 )
-async def trader_settings() -> Success[list[dict[str, Any]]]:
-    bases = [await read_json_file(base) for base in paths.traders.rglob("base.json")]
+@inject
+async def trader_settings(
+    trader_manager: Annotated[TraderManager, Inject],
+) -> Success[list[dict[str, Any]]]:
+    bases = [trader.base for trader in trader_manager.traders.values()]
     bases.sort(key=operator.itemgetter("_id"))
     return Success(data=bases)
 
